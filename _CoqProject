@@ -1,0 +1,22 @@
+COQC = hoqc
+-R . MyLib
+
+MyTacs.v
+MyLemmas.v
+
+Colimits/Auxiliary.v
+Colimits/CechNerve.v
+Colimits/CoEqualizer.v
+Colimits/Colimit_Prod.v
+Colimits/Colimit_Sigma.v
+Colimits/Colimit.v
+Colimits/CommutativeSquares.v
+Colimits/Diagram.v
+Colimits/KernelPair.v
+Colimits/MappingTelescope.v
+
+StrictEq/EOverture.v
+StrictEq/EPathGroupoids.v
+StrictEq/ETypes.v
+
+FibCofib.v
