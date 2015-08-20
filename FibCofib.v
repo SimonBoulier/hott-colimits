@@ -263,7 +263,7 @@ Section Acyclique.
     - rewrite Etransport_pp. rewrite <- Etransport_compose.
       rewrite Etransport_pp. rewrite <- Etransport_compose.
       specialize (Hg3 (s x)).
-  Admitted.
+  Admitted.   (* TODO. But I'm convinced that this is ok. *)
 
   Lemma surjective_eq_retract `(f: X -> Y) `(f': X' -> Y') (Hf': f' RetractOf f) (Hf: IsSurjectiveEquivalence f)
     : IsSurjectiveEquivalence f'.
@@ -488,14 +488,7 @@ Section LP.
         etransitivity. exact (Etransport_compose _ _ _ _)^E. simpl.
         etransitivity. 2: exact (Etransport_compose _ _ _ _).
         etransitivity. exact e1. simpl. clear e0 e1. subst H e.
-
-        Lemma pouet `(P: Y -> X -> Type) `(Q: X -> Type) {w z: sig (λ y, sig (P y))} (e: w ≡ z) (u: Q z.2.1)
-          : Etransport (λ x : ∃ (y : Y) x, P y x, Q (x.2).1) e^E u
-≡ Etransport Q (((Etransport_sigma' e ..1E w.2)^E E@ e ..2E)^E) ..1E u.
-          destruct e; reflexivity.
-        Defined.
-
-        exact (pouet (λ y x, f x = y) (λ x', f x' = f x) (H1 x) _)^E.
+        exact (Etransport_pr2_pr1 (λ y x, f x = y) (λ x', f x' = f x) (H1 x) _)^E.
     - intros Hf B B' g Hg. apply LP_AC_F; assumption.
   Defined.
 

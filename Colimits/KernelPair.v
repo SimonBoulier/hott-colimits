@@ -129,7 +129,7 @@ Section KP_Sigma.
     refine (KP_cocone f (λ x y e, e)).
   Defined.
 
-  Definition ok : KP_cocone f (λ x y e, e) = postcompose_cocone (precompose_cocone diagram_map_fib_fib_diag (sigma_cocone _ HQ2)) pr1.
+  Definition KP_cocone_lift_ok : KP_cocone f (λ x y e, e) = postcompose_cocone (precompose_cocone diagram_map_fib_fib_diag (sigma_cocone _ HQ2)) pr1.
     refine (path_cocone _ _).
     - intros i x; destruct i; reflexivity.
     - intros i j g x; destruct i, j, g; simpl in *; hott_simpl; unfold path_sigma'.
@@ -168,7 +168,7 @@ Section KP_Sigma.
   Definition KP_lift_slicing : KP_lift = pr1 o KP_slicing.
     refine (equiv_inj (postcompose_cocone HQ1) _). apply HQ1.
     unfold KP_lift, postcompose_cocone_inv. rewrite eisretr.
-    rewrite ok. etransitivity. 2:refine (postcompose_cocone_comp _ _ _)^.
+    rewrite KP_cocone_lift_ok. etransitivity. 2:refine (postcompose_cocone_comp _ _ _)^.
     apply ap10.
     (* Set Printing Implicit. *)
     refine (apD10 _ Y). apply ap.
@@ -194,6 +194,44 @@ Section KP_Sigma.
   Defined.
 End KP_Sigma.
 
-
-
-(*  *)
+Section KP_lift_equiv.
+  Definition hfiber_KP_lift_equiv `(f: X -> Y) {A: Type} (y: Y) (e: (hfiber f y) <~>  A)
+    : {e': hfiber (KP_lift f (KP_colimit f)) y <~> T A & α o e == e' o (λ x: hfiber f y, (kp x.1; x.2))}.
+    refine (exist _ _ _).
+    - etransitivity.
+      refine (KP_lift_hfiber (Q2 := λ y, T (hfiber f y)) _ _ _ _).
+      intros; apply T_colimit.
+      refine (functoriality_colimit_equiv _ (T_colimit _) (T_colimit _)).
+      refine (T_diag_equiv _). exact e.
+    - intros [x p].
+      pose (Te := functoriality_colimit (T_diag_equiv e) (T_colimit _) (T_colimit _)).
+      transitivity (Te (α (x; p))). symmetry.
+      refine (functoriality_colimit_commute (T_diag_equiv e) _ _ false (x; p))^.
+      match goal with
+      | |- ?AA = _ (transitive_equiv _ _ _ ?ee1 ?ee4) ?xx =>
+        change (AA = ee4 (ee1 (kp x; p))); set (e4 := equiv_fun ee4)
+      end. unfold KP_lift_hfiber.
+      match goal with
+      | |- ?AA = e4 (_ (transitive_equiv _ _ _ ?ee1 ?ee2) ?xx) =>
+        change (AA = e4 (ee2 (ee1 (kp x; p)))); set (e1 := equiv_fun ee1)
+      end. 
+      match goal with
+      | |- ?AA = e4 (_ (transitive_equiv _ _ _ ?ee2 ?ee3) ?xx) =>
+        change (AA = e4 (ee3 (ee2 xx))); set (e2 := equiv_fun ee2); set (e3 := equiv_fun ee3)
+      end.
+      set (sl := equiv_fun (KP_slicing f (KP_colimit f) (λ y0 : Y, T_colimit (hfiber f y0)))) in *.
+      symmetry. etransitivity (e4 (e3 (e2 (sl (kp x); _)))). f_ap.
+      subst e1.
+      etransitivity (e4 (e3 (sl (kp x); _))). f_ap.
+      subst e2.
+      match goal with
+      | |- e4 (e3 (_; ?ppp)) = _ => set (pp := ppp)
+      end.
+      etransitivity (e4 (transport (λ y0 : Y, T (hfiber f y0)) pp (sl (kp x)).2)). reflexivity.
+      clear e3. f_ap. clear e4.
+      change (transport (λ y, T (hfiber f y)) pp (α (x; 1)) = α (x;p)).
+      etransitivity.
+      refine (transport_colimit _ (λ y, T_colimit (hfiber f y)) pp false (x; 1)).
+      apply β.
+  Defined.
+End KP_lift_equiv.

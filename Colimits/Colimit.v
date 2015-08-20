@@ -66,11 +66,6 @@ Section IsColimit.
   Global Arguments is_colimit_C {D Q} C : rename.
   Global Arguments is_colimit_H {D Q} H X : rename.
   
-  (* Definition is_colimit_H' (D: diagram G) `(H: is_colimit D Q) *)
-  (* : forall (X: Type), IsEquiv (@postcompose_cocone _ _ _ (is_colimit_C H) X) := is_colimit_H H. *)
-
-  (* Coercion is_colimit_H' : is_colimit >-> Funclass. *)
-  
   Definition postcompose_cocone_inv {D: diagram G} `(H: is_colimit D Q) `(C: cocone D X) : Q -> X
     := equiv_inv _ (IsEquiv := (is_colimit_H H X)) C.
 End IsColimit.
@@ -138,9 +133,6 @@ Module Export colimit_HIT.
   Definition is_colimit_colimit {G: graph} (D: diagram G) : is_colimit D (colimit D)
     := Build_is_colimit _ (is_universal_colimit D).
 End colimit_HIT.
-
-
-
 
 
 
@@ -321,12 +313,3 @@ Section TransportColimit.
     destruct p; reflexivity.
   Defined.
 End TransportColimit.
-    
-
-
-
-
-
-
-
-  (*  *)

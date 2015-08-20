@@ -1,4 +1,4 @@
-Require Import HoTT.Basics HoTT.Types.
+Require Import HoTT.Basics HoTT.Types HoTT.Fibrations.
 Require Import MyTacs.
 Generalizable All Variables.
 
@@ -51,6 +51,22 @@ Lemma equiv_paths {A: Type} {a a' b: A} (p: a = a') : a = b <~> a' = b.
   refine (equiv_adjointify (concat p^) (concat p) _ _); intro; abstract hott_simpl.
 Defined.
   
+Definition transport_hfiber `(f: A -> B) `(e: b = b') `(p: f a = b)
+: transport (λ b, hfiber f b) e (a; p) = (a; p @ e).
+  path_induction. reflexivity.
+Defined.
+
+
+Definition functor_fibration_replacement `{f: X -> Y} `{f': X' -> Y} (g: X -> X')
+           (e: f' o g == f)
+: sig (hfiber f) → sig (hfiber f')
+  := λ x, (x.1; (g x.2.1; (e x.2.1) @ x.2.2)).
+
+Definition fibration_replacement_commute `(g: X -> X') `(f: X -> Y) (f': X' -> Y) (e: f' o g == f)
+: (functor_fibration_replacement g e) o (equiv_fibration_replacement f) == (equiv_fibration_replacement f') o g.
+  intros x; simpl.
+  refine (path_sig_hfiber (f:=f') _ _ _). reflexivity.
+Defined.
 
 
 
@@ -80,3 +96,11 @@ Lemma ap_ap2_path_forall `{HF:Funext} (X:Type) (Y : X -> Type) (Z:forall x:X, Y 
   apply ap_ap_path_forall.
 Qed.
 Unset Implicit Arguments.
+
+
+Require Import StrictEq.EOverture StrictEq.ETypes. 
+Lemma Etransport_pr2_pr1 `(P: Y -> X -> Type) `(Q: X -> Type) {w z: sig (λ y, sig (P y))} (e: w ≡ z) (u: Q z.2.1)
+  : Etransport (λ x : ∃ (y : Y) x, P y x, Q (x.2).1) e^E u
+        ≡ Etransport Q (((Etransport_sigma' e ..1E w.2)^E E@ e ..2E)^E) ..1E u.
+  destruct e; reflexivity.
+Defined.
