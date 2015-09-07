@@ -247,7 +247,54 @@ Section Acyclique.
   
   Global Arguments Build_IsSurjectiveEquivalence {X Y g} s H1 H2 : rename.
 
-     
+  Lemma popo2 `(z: A) `(p: z ≡ x)
+    : Etransport (λ u, u = z) p 1 ≡ Eq_to_paths p^E.
+  Proof.
+    destruct p. reflexivity.
+  Defined.
+
+  Lemma popo2' `(f: A -> B) (z: A) `(p: z ≡ x)
+    : Etransport (λ u, f u = f z) p 1 ≡ Eq_to_paths (Eap f p^E).
+  Proof.
+    by destruct p.
+  Defined.
+  
+  Lemma popo3 `(x: A) `(p: x ≡ y)
+    : (Eq_to_paths p)^ ≡ Eq_to_paths p^E.
+  Proof.
+    destruct p; reflexivity.
+  Defined.
+  
+  Lemma popo4 `(f: A -> B) (x y: A) (p: x ≡ y)
+    : ap f (Eq_to_paths p) ≡ Eq_to_paths (Eap f p).
+  Proof.
+    destruct p; reflexivity.
+  Defined.
+
+  Lemma popo5 `(z: A) `(p: y ≡ x) (q: z ≡ y)
+    : Etransport (λ u, z = u) p (Eq_to_paths q) ≡ Eq_to_paths (q E@ p).
+  Proof.
+    destruct p, q; simpl. reflexivity.
+  Defined.
+  
+  Lemma popo6 `(z: A) `(p: y ≡ x) (q: y ≡ z)
+    : Etransport (λ u, u = z) p (Eq_to_paths q) ≡ Eq_to_paths (p^E E@ q).
+  Proof.
+    destruct p, q; simpl. reflexivity.
+  Defined.
+
+  Lemma popo6' {A B: Type} (f g: A -> B) `(p: y ≡ x) (q: f y ≡ g y)
+    : Etransport (λ u, f u = g u) p (Eq_to_paths q) ≡ Eq_to_paths ((Eap f p^E) E@ q E@ (Eap g p)).
+  Proof.
+    destruct p; simpl. by destruct q.
+  Defined.
+
+  Lemma popo7 `(P: A -> Type) (f: forall x, P x) {x y: A} (p: x ≡ y)
+    : Etransport P p (f x) ≡ f y.
+  Proof.
+      by destruct p.
+  Defined.
+  
   Lemma injective_eq_retract `(f: X -> Y) `(f': X' -> Y') (Hf': f' RetractOf f) (Hf: IsInjectiveEquivalence f)
     : IsInjectiveEquivalence f'.
   Proof.
@@ -258,13 +305,27 @@ Section Acyclique.
     - etransitivity. exact (sr _)^E. apply Eap.
       etransitivity. exact (Hg1 _). apply Eap.
       exact (Hf1 _).
-    - exact (Etransport (λ u, u = x) (Hf2 _)
+    (* - refine (Etransport (λ v, f' (r (g (s' x))) = v) (sr' x) _). *)
+    (*   exact (Etransport (λ u, u = _) (Hf2 _) (ap r' (Hg2 (s' x)))). *)
+     - exact (Etransport (λ u, u = x) (Hf2 _)
                         (Etransport (λ v, _ = v) (sr' x)  (ap r' (Hg2 (s' x))))).
-    - rewrite Etransport_pp. rewrite <- Etransport_compose.
-      rewrite Etransport_pp. rewrite <- Etransport_compose.
-      specialize (Hg3 (s x)).
-  Admitted.   (* TODO. But I'm convinced that this is ok. *)
+    - rewrite popo2'.
+      assert (ap r' (Hg2 (s' (f' x))) ≡ ap r'
+           (Etransport (λ u : Y, u = s' (f' x))
+              ((Hf1 x)^E E@ Eap f (Hg1 (s x) E@ Eap g (Hf1 x))) 1)). {
+        apply Eap. specialize (Hg3 (s x)).
+        rewrite popo2. rewrite popo2' in Hg3.
+        specialize (popo7 _ Hg2 (Hf1 x)). intro.
+        refine (X0^E E@ _). clear X0.
+        rewrite Hg3. rewrite (popo6' (f o g) idmap).
+        apply Eap. apply Eq_UIP. }
+        
+      rewrite X0. clear.
+      rewrite popo2, popo4. 
+      rewrite popo5, popo6. apply Eap. apply Eq_UIP.
+  Defined.
 
+  
   Lemma surjective_eq_retract `(f: X -> Y) `(f': X' -> Y') (Hf': f' RetractOf f) (Hf: IsSurjectiveEquivalence f)
     : IsSurjectiveEquivalence f'.
   Proof.
@@ -291,30 +352,6 @@ Section Acyclique.
     - etransitivity. apply ap. apply ap. exact (Eq_to_paths (Hf1 _)^E).
       etransitivity. apply ap. exact (Hg2 _).
       exact (Eq_to_paths (sr _)).
-  Defined.
-  
-  Lemma AC_C `(f: X -> Y) (Hf: IsInjectiveEquivalence f) : IsCoFibration f.
-  Proof.
-    destruct Hf as [g Hg1 Hg2 Hg3].
-    refine (Build_IsCoFibration f
-              (Build_Retract idmap idmap (λ y, (y; (Hg2 y) # top (g y))) pr1 _ _ _ _));
-      intro; try reflexivity.
-    refine (eq_sigma' _ E1 _); simpl. rewrite (Hg3 x).
-    destruct (Hg1 x). reflexivity.
-  Defined.
-  
-  Lemma TF0_AF `(P: A -> Type) (π1 := @pr1 _ P) (Hpi: IsEquiv π1)
-  : IsSurjectiveEquivalence π1.
-  Proof.
-    refine (Build_IsSurjectiveEquivalence _ _ _).
-    - refine (λ y, (y; (_ # (π1^-1 y).2))).
-      apply eisretr.
-    - reflexivity.
-    - intros x; cbn.
-      refine (path_sigma' _ 1 _); cbn.
-      change ((transport P (eisretr pr1 x.1) (pr1^-1 x.1).2) = x.2).
-      transitivity (transport P (ap pr1 (eissect pr1 x)) (pr1^-1 x.1).2).
-      apply ap10. apply ap. apply eisadj. exact (pr2_path _).
   Defined.
 End Acyclique.
 
@@ -538,49 +575,87 @@ End LP.
 
 
 Section Acyclique2.
+  Lemma AC_C `(f: X -> Y) (Hf: IsInjectiveEquivalence f) : IsCoFibration f.
+  Proof.
+    destruct Hf as [g Hg1 Hg2 Hg3].
+    refine (Build_IsCoFibration f
+              (Build_Retract idmap idmap (λ y, (y; (Hg2 y) # top (g y))) pr1 _ _ _ _));
+      intro; try reflexivity.
+    refine (eq_sigma' _ E1 _); simpl. rewrite (Hg3 x).
+    destruct (Hg1 x). reflexivity.
+  Defined.
+
   Lemma AF_F `(f: X -> Y) (Hf: IsSurjectiveEquivalence f) : IsFibration f.
   Proof.
     apply RLP_AC. apply RLP_C in Hf.
     intros X' Y' g Hg. apply Hf. apply AC_C. assumption.
   Defined.
-  
-  Lemma AF `(f: X <~> Y) (Hf: IsFibration f) : IsSurjectiveEquivalence f.
+
+  Lemma TF0_AF `(P: A -> Type) (π1 := @pr1 _ P) (Hpi: IsEquiv π1)
+  : IsSurjectiveEquivalence π1.
   Proof.
-    apply RLP_AC in Hf.
-    unfold RLP in Hf.
-    specialize (Hf X (sig (hfiber f)) (λ x, (f x; (x; 1))) (factoAC_F_AC _ _ _)
-                   idmap pr1 (λ _, E1)).
-    destruct Hf as [g [Hg1 Hg2]].
-    refine (surjective_eq_retract (@pr1 _ (hfiber f)) _ _ _).
-    refine (Build_Retract (λ x, (f x; (x; 1))) g idmap idmap _ _ _ _);
-      intro; cbn; try reflexivity.
-    - exact (Hg1 _).
-    - exact (Hg2 _)^E.
-    - apply TF0_AF. refine (cancelR_isequiv (λ x, (f x; (x; 1)))).
-      refine (isequiv_adjointify (λ w, w.2.1) _ _);
-        intro; simpl.
-      refine (path_sig_hfiber _ _ _). reflexivity. reflexivity.
-      apply f.
+    refine (Build_IsSurjectiveEquivalence _ _ _).
+    - refine (λ y, (y; (_ # (π1^-1 y).2))).
+      apply eisretr.
+    - reflexivity.
+    - intros x; cbn.
+      refine (path_sigma' _ 1 _); cbn.
+      change ((transport P (eisretr pr1 x.1) (pr1^-1 x.1).2) = x.2).
+      transitivity (transport P (ap pr1 (eissect pr1 x)) (pr1^-1 x.1).2).
+      apply ap10. apply ap. apply eisadj. exact (pr2_path _).
   Defined.
 
-  Lemma AC `(f: X <~> Y) (Hf: IsCoFibration f) : IsInjectiveEquivalence f.
+  Lemma AF `(f: X -> Y) : (IsEquiv f /\ IsFibration f) <-> IsSurjectiveEquivalence f.
   Proof.
-    apply LLP_AF in Hf.
-    unfold RLP in Hf.
-    assert (H: IsSurjectiveEquivalence (@pr1 _ (hfiber f))). {
-      apply TF0_AF. refine (cancelR_isequiv (λ x, (f x; (x; 1)))).
-      refine (isequiv_adjointify (λ w, w.2.1) _ _);
-        intro; simpl.
-      refine (path_sig_hfiber _ _ _). reflexivity. reflexivity.
-      apply f. }
-    specialize (Hf (sig (hfiber f)) Y pr1 H
-                   (λ x, (f x; (x; 1))) idmap (λ _, E1)).
-    clear H. destruct Hf as [g [Hg1 Hg2]].
-    refine (injective_eq_retract (λ x, (f x; (x; 1)): sig (hfiber f)) _ _ _).
-    refine (Build_Retract idmap idmap g pr1 _ _ _ _);
-      intro; cbn; try reflexivity.
-    - exact (Hg2 _).
-    - exact (Hg1 _)^E.
-    - apply factoAC_F_AC.
+    split.
+    - intros [Hf1 Hf2].
+      apply RLP_AC in Hf2.
+      unfold RLP in Hf2.
+      specialize (Hf2 X (sig (hfiber f)) (λ x, (f x; (x; 1))) (factoAC_F_AC _ _ _)
+                      idmap pr1 (λ _, E1)).
+      destruct Hf2 as [g [Hg1 Hg2]].
+      refine (surjective_eq_retract (@pr1 _ (hfiber f)) _ _ _).
+      refine (Build_Retract (λ x, (f x; (x; 1))) g idmap idmap _ _ _ _);
+        intro; cbn; try reflexivity.
+      + exact (Hg1 _).
+      + exact (Hg2 _)^E.
+      + apply TF0_AF. refine (cancelR_isequiv (λ x, (f x; (x; 1)))).
+        refine (isequiv_adjointify (λ w, w.2.1) _ _);
+          intro; simpl.
+        refine (path_sig_hfiber _ _ _). reflexivity. reflexivity.
+    - intros Hf. split.
+      + destruct Hf as [s Hs1 Hs2]. refine (isequiv_adjointify s _ Hs2).
+        intros y. apply Eq_to_paths. symmetry. apply Hs1.
+      + by apply AF_F.
+  Defined.
+
+  Lemma AC `(f: X -> Y) : (IsEquiv f /\ IsCoFibration f) <-> IsInjectiveEquivalence f.
+  Proof.
+    split.
+    - intros [Hf1 Hf2].
+      apply LLP_AF in Hf2.
+      assert (H: IsSurjectiveEquivalence (@pr1 _ (hfiber f))). {
+        apply TF0_AF. refine (cancelR_isequiv (λ x, (f x; (x; 1)))).
+        refine (isequiv_adjointify (λ w, w.2.1) _ _);
+          intro; simpl.
+        refine (path_sig_hfiber _ _ _). reflexivity. reflexivity. }
+      specialize (Hf2 (sig (hfiber f)) Y pr1 H
+                      (λ x, (f x; (x; 1))) idmap (λ _, E1)).
+      clear H. destruct Hf2 as [g [Hg1 Hg2]].
+      (* refine (Build_IsInjectiveEquivalence (λ y, (g y).2.1) _ _ _). *)
+      (* intros x; simpl. symmetry. exact (Eap (λ w, w.2.1) (Hg1 x)). *)
+      (* intros x. refine (Etransport (λ v, _ = v) (Hg2 x) (g x).2.2). *)
+      (* intros x; simpl. destruct (Hg1 (x)). *)
+
+      refine (injective_eq_retract (λ x, (f x; (x; 1)): sig (hfiber f)) _ _ _).
+      refine (Build_Retract idmap idmap g pr1 _ _ _ _);
+        intro; cbn; try reflexivity.
+      + exact (Hg2 _).
+      + exact (Hg1 _)^E.
+      + apply factoAC_F_AC.
+    - intros Hf. split.
+      + destruct Hf as [r Hr1 Hr2 Hr3]. refine (isequiv_adjointify r _ _). exact Hr2.
+        intros x. apply Eq_to_paths. symmetry. apply Hr1.
+      + by apply AC_C.
   Defined.
 End Acyclique2.
