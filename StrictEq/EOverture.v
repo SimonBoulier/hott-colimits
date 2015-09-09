@@ -241,3 +241,20 @@ Ltac Erecall_as term name eqname :=
   clearbody eqname name.
 Tactic Notation "Erecall" constr(term) "as" ident(name) "eqn:" ident(eqname) :=
   Erecall_as term name eqname.
+
+
+Require Import Basics.Trunc.
+
+Lemma hprop_eq : forall {A: Type} (x y: A), IsHProp (x ≡ y).
+Proof.
+  intros A x y. apply hprop_allpath.
+  intros p q; apply Eq_to_paths, Eq_UIP.
+Defined.
+Global Existing Instance hprop_eq.
+
+Lemma hprop_pointwise_eq : forall `{Funext} {A} {P:A->Type} (f g:forall x:A, P x), IsHProp (f ≡≡ g).
+Proof.
+  intros F A P f g. apply hprop_allpath.
+  intros p q. apply path_forall. intros x. apply Eq_to_paths, Eq_UIP.
+Defined.
+Global Existing Instance hprop_pointwise_eq.

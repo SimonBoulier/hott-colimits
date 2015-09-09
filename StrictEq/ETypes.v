@@ -1,6 +1,8 @@
 Require Import HoTT.Basics.Overture.
 Require Import StrictEq.EOverture StrictEq.EPathGroupoids.
 
+Open Scope path.
+
 (* Contr *)
 
 Definition eq_econtr {A : Type} `{EContr A} (x y : A) : x ≡ y
@@ -135,42 +137,129 @@ Defined.
 
 
 (* Paths *)
-Definition Etransport_paths_l {A : Type} {x1 x2 y : A} (p : x1 ≡ x2) (q : x1 = y)
-  : 1 @ Etransport (fun x => x = y) p q ≡ (Eq_to_paths p^E) @ q.
-Proof.
-  destruct p; simpl. reflexivity.
-Defined.
-
-Definition Etransport_paths_r {A : Type} {x y1 y2 : A} (p : y1 ≡ y2) (q : x = y1)
-  : (Etransport (fun y => x = y) p q) @ 1= q @ (Eq_to_paths p).
-Proof.
-  destruct p; simpl. reflexivity.
-Defined.
-
-(* Definition transport_paths_lr {A : Type} {x1 x2 : A} (p : x1 = x2) (q : x1 = x1) *)
-(*   : transport (fun x => x = x) p q = p^ @ q @ p. *)
+(* Definition Etransport_paths_l {A : Type} {x1 x2 y : A} (p : x1 ≡ x2) (q : x1 = y) *)
+(*   : 1 @ Etransport (fun x => x = y) p q ≡ (Eq_to_paths p^E) @ q. *)
 (* Proof. *)
-(*   destruct p; simpl. *)
-(*   exact ((concat_1p q)^ @ (concat_p1 (1 @ q))^). *)
+(*   destruct p; simpl. reflexivity. *)
 (* Defined. *)
 
-Definition Etransport_paths_Fl {A B : Type} {f : A -> B} {x1 x2 : A} {y : B}
-  (p : x1 ≡ x2) (q : f x1 = y)
-  : 1 @ Etransport (fun x => f x = y) p q = (ap f (Eq_to_paths p))^ @ q.
-Proof.
-  destruct p; simpl. reflexivity.
-Defined.
-
-(* Definition transport_paths_Fr {A B : Type} {g : A -> B} {y1 y2 : A} {x : B} *)
-(*   (p : y1 = y2) (q : x = g y1) *)
-(*   : transport (fun y => x = g y) p q = q @ (ap g p). *)
+(* Definition Etransport_paths_r {A : Type} {x y1 y2 : A} (p : y1 ≡ y2) (q : x = y1) *)
+(*   : (Etransport (fun y => x = y) p q) @ 1= q @ (Eq_to_paths p). *)
 (* Proof. *)
-(*   destruct p. symmetry; apply concat_p1. *)
+(*   destruct p; simpl. reflexivity. *)
 (* Defined. *)
 
-Definition Etransport_paths_FlFr {A B : Type} {f g : A -> B} {x1 x2 : A}
-  (p : x1 ≡ x2) (q : f x1 = g x1)
-  : 1 @ (Etransport (fun x => f x = g x) p q) @ 1 = (ap f (Eq_to_paths p))^ @ q @ (ap g (Eq_to_paths p)).
+(* (* Definition transport_paths_lr {A : Type} {x1 x2 : A} (p : x1 = x2) (q : x1 = x1) *) *)
+(* (*   : transport (fun x => x = x) p q = p^ @ q @ p. *) *)
+(* (* Proof. *) *)
+(* (*   destruct p; simpl. *) *)
+(* (*   exact ((concat_1p q)^ @ (concat_p1 (1 @ q))^). *) *)
+(* (* Defined. *) *)
+
+(* Definition Etransport_paths_Fl {A B : Type} {f : A -> B} {x1 x2 : A} {y : B} *)
+(*   (p : x1 ≡ x2) (q : f x1 = y) *)
+(*   : 1 @ Etransport (fun x => f x = y) p q = (ap f (Eq_to_paths p))^ @ q. *)
+(* Proof. *)
+(*   destruct p; simpl. reflexivity. *)
+(* Defined. *)
+
+(* (* Definition transport_paths_Fr {A B : Type} {g : A -> B} {y1 y2 : A} {x : B} *) *)
+(* (*   (p : y1 = y2) (q : x = g y1) *) *)
+(* (*   : transport (fun y => x = g y) p q = q @ (ap g p). *) *)
+(* (* Proof. *) *)
+(* (*   destruct p. symmetry; apply concat_p1. *) *)
+(* (* Defined. *) *)
+
+(* Definition Etransport_paths_FlFr {A B : Type} {f g : A -> B} {x1 x2 : A} *)
+(*   (p : x1 ≡ x2) (q : f x1 = g x1) *)
+(*   : 1 @ (Etransport (fun x => f x = g x) p q) @ 1 = (ap f (Eq_to_paths p))^ @ q @ (ap g (Eq_to_paths p)). *)
+(* Proof. *)
+(*   destruct p; simpl. reflexivity. *)
+(* Defined. *)
+
+
+Definition Etransport_paths_l1 {A: Type} {x y: A} (p: y ≡ x)
+  : Etransport (fun x => x = y) p 1 ≡ (Eq_to_paths p^E).
 Proof.
-  destruct p; simpl. reflexivity.
+    by destruct p.
+Defined.
+
+Definition Etransport_paths_r1 {A: Type} {x y: A} (p: x ≡ y)
+  : Etransport (fun y => x = y) p 1 ≡ Eq_to_paths p.
+Proof.
+    by destruct p.
+Defined.
+
+Definition transport_paths_lr1 {A : Type} {x y: A} (p: x ≡ y)
+  : Etransport (fun x => x = x) p 1 ≡ 1.
+Proof.
+    by destruct p.
+Defined.
+
+Definition Etransport_paths_Fl1 {A B: Type} {f: A -> B} {x y: A} (p: y ≡ x)
+  : Etransport (fun x => f x = f y) p 1 = Eq_to_paths (Eap f p^E).
+Proof.
+    by destruct p.
+Defined.
+
+Definition Etransport_paths_Fr1 {A B: Type} {f: A -> B} {x y: A} (p: x ≡ y)
+  : Etransport (fun y => f x = f y) p 1 = Eq_to_paths (Eap f p).
+Proof.
+    by destruct p.
+Defined.
+
+
+Definition Etransport_paths_lE {A: Type} {x1 x2 y: A} (p: x1 ≡ x2) (q: x1 ≡ y)
+  : Etransport (fun x => x = y) p (Eq_to_paths q) ≡ Eq_to_paths (p^E E@ q).
+Proof.
+  destruct p; simpl. apply Eap, Eq_UIP.
+Defined.
+
+Definition Etransport_paths_rE {A: Type} {x y1 y2: A} (p: y1 ≡ y2) (q: x ≡ y1)
+  : Etransport (fun y => x = y) p (Eq_to_paths q) ≡ Eq_to_paths (q E@ p).
+Proof.
+  destruct p; simpl. apply Eap, Eq_UIP.
+Defined.
+
+Definition Etransport_paths_lrE {A: Type} {x1 x2: A} (p: x1 ≡ x2) (q: x1 ≡ x1)
+  : Etransport (fun x => x = x) p (Eq_to_paths q) ≡ Eq_to_paths (p^E E@ q E@ p).
+Proof.
+  destruct p; simpl. apply Eap, Eq_UIP.
+Defined.
+
+Definition Etransport_paths_FlE {A B: Type} {f: A -> B} {x1 x2: A} {y: B} (p: x1 ≡ x2) (q: f x1 ≡ y)
+  : Etransport (fun x => f x = y) p (Eq_to_paths q) ≡ Eq_to_paths ((Eap f p^E) E@ q).
+Proof.
+  destruct p; simpl. apply Eap, Eq_UIP.
+Defined.
+
+Definition Etransport_paths_FrE {A B: Type} {g: A -> B} {y1 y2: A} {x: B} (p: y1 ≡ y2) (q: x ≡ g y1)
+  : Etransport (fun y => x = g y) p (Eq_to_paths q) ≡ Eq_to_paths (q E@ (Eap g p)).
+Proof.
+  destruct p; simpl. apply Eap, Eq_UIP.
+Defined.
+
+Definition Etransport_paths_FlFrE {A B: Type} {f g: A -> B} {x1 x2: A} (p: x1 ≡ x2) (q: f x1 ≡ g x1)
+  : Etransport (fun x => f x = g x) p (Eq_to_paths q) ≡ Eq_to_paths ((Eap f p^E) E@ q E@ (Eap g p)).
+Proof.
+  destruct p; simpl. apply Eap, Eq_UIP.
+Defined.
+
+
+Lemma ETP_inv {A: Type} {x y: A} (p: x ≡ y)
+  : (Eq_to_paths p)^ ≡ Eq_to_paths p^E.
+Proof.
+    by destruct p.
+Defined.
+
+Lemma ETP_concat {A: Type} {x y z: A} (p: x ≡ y) (q: y ≡ z)
+  : Eq_to_paths p @ Eq_to_paths q ≡ Eq_to_paths (p E@ q).
+Proof.
+    by destruct p, q.
+Defined.
+
+Lemma ETP_ap {A B: Type} (f: A -> B) {x y: A} (p: x ≡ y)
+  : ap f (Eq_to_paths p) ≡ Eq_to_paths (Eap f p).
+Proof.
+    by destruct p.
 Defined.
