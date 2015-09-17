@@ -550,26 +550,37 @@ Section Acyclique2.
     intros X' Y' g Hg. apply Hf. apply AC_C. assumption.
   Defined.
 
-  Lemma TF0_AF `(P: A -> Type) (π1 := @pr1 _ P) (Hpi: IsEquiv π1)
-  : IsSurjectiveEquivalence π1.
+  (* Lemma TF0_AF `(P: A -> Type) (π1 := @pr1 _ P) (Hpi: IsEquiv π1) *)
+  (* : IsSurjectiveEquivalence π1. *)
+  (* Proof. *)
+  (*   refine (Build_IsSurjectiveEquivalence _ _ _ _). *)
+  (*   - refine (λ x, (x; (_ # (π1^-1 x).2))). *)
+  (*     apply eisretr. *)
+  (*   - reflexivity. *)
+  (*   - intros x; cbn. *)
+  (*     refine (path_sigma' _ 1 _); cbn. *)
+  (*     change ((transport P (eisretr pr1 x.1) (pr1^-1 x.1).2) = x.2). *)
+  (*     transitivity (transport P (ap pr1 (eissect pr1 x)) (pr1^-1 x.1).2). *)
+  (*     apply ap10. apply ap. apply eisadj. exact (pr2_path _). *)
+  (*   - intros; simpl.  *)
+  (*     match goal with *)
+  (*     | |- path_sigma' _ _ ((ap10 ?AA ?BB) @ ?CC ..2) ≡ _ => set (e1 := AA); set (x := BB); set (e2 := CC); change (path_sigma' P 1 ((ap10 e1 x) @ (e2 ..2)) ≡ 1)  *)
+  (*     end. simpl in *. *)
+  (*     (* etransitivity (path_sigma' P 1 1). 2: reflexivity. *) *)
+  (*     (* apply Eap. *) admit. *)
+  (* Defined. *)
+
+  Lemma pi1_hfiber_equiv_AF `(f: X -> Y) (H: IsEquiv f)
+    : IsSurjectiveEquivalence (@pr1 _ (hfiber f)).
   Proof.
     refine (Build_IsSurjectiveEquivalence _ _ _ _).
-    - refine (λ x, (x; (_ # (π1^-1 x).2))).
-      apply eisretr.
+    - intro y; exists y. exists (f^-1 y). apply eisretr.
     - reflexivity.
-    - intros x; cbn.
-      refine (path_sigma' _ 1 _); cbn.
-      change ((transport P (eisretr pr1 x.1) (pr1^-1 x.1).2) = x.2).
-      transitivity (transport P (ap pr1 (eissect pr1 x)) (pr1^-1 x.1).2).
-      apply ap10. apply ap. apply eisadj. exact (pr2_path _).
-    - intros; simpl. 
-      match goal with
-      | |- path_sigma' _ _ ((ap10 ?AA ?BB) @ ?CC ..2) ≡ _ => set (e1 := AA); set (x := BB); set (e2 := CC); change (path_sigma' P 1 ((ap10 e1 x) @ (e2 ..2)) ≡ 1) 
-      end. simpl in *.
-      (* etransitivity (path_sigma' P 1 1). 2: reflexivity. *)
-      (* apply Eap. *) admit.
+    - intro y. refine (path_sig_hfiber _ _ _).
+      cbn. etransitivity. apply ap. exact y.2.2^.
+      apply eissect.
+    - admit.
   Defined.
-  
   
   Lemma AF `(f: X -> Y) : (IsEquiv f /\ IsFibration f) <-> IsSurjectiveEquivalence f.
   Proof.
@@ -585,10 +596,7 @@ Section Acyclique2.
         intro; cbn; try reflexivity.
       + exact (Hg1 _).
       + exact (Hg2 _)^E.
-      + apply TF0_AF. refine (cancelR_isequiv (λ x, (f x; (x; 1)))).
-        refine (isequiv_adjointify (λ w, w.2.1) _ _);
-          intro; simpl.
-        refine (path_sig_hfiber _ _ _). reflexivity. reflexivity.
+      + by apply pi1_hfiber_equiv_AF.
     - intros Hf. split.
       + destruct Hf as [s Hs1 Hs2]. refine (isequiv_adjointify s _ Hs2).
         intros y. apply Eq_to_paths. symmetry. apply Hs1.
@@ -614,24 +622,11 @@ Section Acyclique2.
       (*   exact (ap (f o (sig_cyl_rec X (λ x : X, x) f^-1 (λ x : X, (eissect f x)^))) X0). *)
       (*   apply eisretr. *)
       (* + intros x. cbn. rewrite ap_pp. *)
-
-
-
       
       apply LLP_AF in Hf2.
-      assert (H: IsSurjectiveEquivalence (@pr1 _ (hfiber f))). {
-        apply TF0_AF. refine (cancelR_isequiv (λ x, (f x; (x; 1)))).
-        refine (isequiv_adjointify (λ w, w.2.1) _ _);
-          intro; simpl.
-        refine (path_sig_hfiber _ _ _). reflexivity. reflexivity. }
-      specialize (Hf2 (sig (hfiber f)) Y pr1 H
+      specialize (Hf2 (sig (hfiber f)) Y pr1 (pi1_hfiber_equiv_AF _ Hf1)
                       (λ x, (f x; (x; 1))) idmap (λ _, E1)).
-      clear H. destruct Hf2 as [g [Hg1 Hg2]].
-      (* refine (Build_IsInjectiveEquivalence (λ y, (g y).2.1) _ _ _). *)
-      (* intros x; simpl. symmetry. exact (Eap (λ w, w.2.1) (Hg1 x)). *)
-      (* intros x. refine (Etransport (λ v, _ = v) (Hg2 x) (g x).2.2). *)
-      (* intros x; simpl. destruct (Hg1 (x)). *)
-
+      destruct Hf2 as [g [Hg1 Hg2]].
       refine (injective_eq_retract (λ x, (f x; (x; 1)): sig (hfiber f)) _ _ _).
       refine (Build_Retract idmap idmap g pr1 _ _ _ _);
         intro; cbn; try reflexivity.
@@ -644,8 +639,8 @@ Section Acyclique2.
       + by apply AC_C.
   Defined.
 
-  Context `{f: A -> B} {HE: IsEquiv f} {HC: IsCoFibration f}.
-  Eval cbn in (inj_r _ (fst (AC f) (HE,HC))).
+  (* Context `{f: A -> B} {HE: IsEquiv f} {HC: IsCoFibration f}. *)
+  (* Eval cbn in (inj_r _ (fst (AC f) (HE,HC))). *)
   
 End Acyclique2.
 
