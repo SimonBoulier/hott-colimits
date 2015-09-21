@@ -24,25 +24,63 @@ End Diagram.
 
 Notation "D '_f' g" := (diagram1 D g) (at level 10).
 
-(*
+
 Section DiagramMap.
   Context {G: graph}.
   
   Record diagram_map (D1 D2 : diagram G) :=
     { diagram_map_obj :> forall i, D1 i -> D2 i;
       diagram_map_comm: forall i j (g: G i j) x,
-            D2 _f g (diagram_map_obj i x) = diagram_map_obj j (D1 _f g x) }.
+          D2 _f g (diagram_map_obj i x) = diagram_map_obj j (D1 _f g x);
+      diagram_map_id: forall i j a b (p: graph2 _ i j a b) x,
+          diagram2 D2 p (diagram_map_obj i x)
+          = (ap (D2 _f b) (diagram_map_comm _ _ a x) @ diagram_map_comm _ _ b (D1 _f a x))
+              @ ap (diagram_map_obj i) (diagram2 D1 p x)
+          
+    }.
   
   Global Arguments diagram_map_obj [D1 D2] m i x : rename.
-  Global Arguments diagram_map_comm  [D1 D2] m [i j] f x : rename.
-  Global Arguments Build_diagram_map [D1 D2] _ _.
+  Global Arguments diagram_map_comm  [D1 D2] m [i j] g x : rename.
+  Global Arguments diagram_map_id  [D1 D2] m [i j a b] p x : rename.
+  Global Arguments Build_diagram_map [D1 D2] _ _ _.
   
-  Lemma path_diagram_map {D1 D2: diagram G} {m1 m2: diagram_map D1 D2}
+  Lemma path_diagram_map_eq3 {D1 D2: diagram G} {m1 m2: diagram_map D1 D2}
         (h_obj: forall i, m1 i == m2 i)
         (h_comm: forall (i j: G) (g: G i j) (x: D1 i),
                 diagram_map_comm m1 g x @ h_obj j (D1 _f g x) =
                 ap (D2 _f g) (h_obj i x) @ diagram_map_comm m2 g x)
-  : m1 = m2.
+    : Type.
+        refine (forall i j a b (p: graph2 _ i j a b) x,
+                   whiskerR (diagram_map_id m1 p x) (h_obj i x) @ _ = _ @ whiskerL (ap _ (h_obj i x)) (diagram_map_id m2 p x)).
+        Focus 2. symmetry.
+        etransitivity. refine (concat_Ap (diagram2 D2 p) (h_obj i x)).
+        apply whiskerL. apply ap_idmap.
+        symmetry. etransitivity.
+        eapply whiskerR. apply ap_compose.
+        etransitivity. apply concat_p_pp.
+        etransitivity. eapply whiskerR. 
+        etransitivity. apply concat_p_pp.
+        eapply whiskerR. symmetry; apply ap_pp.
+        etransitivity. eapply whiskerR.
+        eapply whiskerR. apply ap. symmetry. apply h_comm.
+        etransitivity. eapply whiskerR. eapply whiskerR.
+        apply ap_pp.
+        etransitivity. apply concat_pp_p.
+        etransitivity. apply concat_pp_p.
+        etransitivity. 2: apply concat_p_pp.
+        etransitivity. 2: apply concat_p_pp.
+        apply whiskerL.
+        etransitivity. apply concat_p_pp.
+        etransitivity. eapply whiskerR.
+        symmetry; apply h_comm.
+        etransitivity. apply concat_pp_p.
+        apply whiskerL.
+        symmetry; apply concat_Ap.
+  Defined.
+End DiagramMap.
+          (*         
+
+      m1 = m2.
     destruct m1 as [m1_obj m1_comm].
     destruct m2 as [m2_obj m2_comm].
     simpl in *. revert h_obj h_comm.

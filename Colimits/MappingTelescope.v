@@ -6,9 +6,10 @@ Context `{Funext}.
 Section MappingTelescope.
 
   Definition mappingtelescope_graph : graph.
-    refine (Build_graph _ _).
+    refine (Build_graph _ _ _).
     - exact nat.
     - intros n m; exact (S n = m).
+    - intros _ _ _ _; exact Empty.
   Defined.
 
   Definition equiv_mappingtelescope_diag (D1 D2: diagram mappingtelescope_graph)
