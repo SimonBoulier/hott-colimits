@@ -7,48 +7,92 @@ Context `{Funext}.
 
 Section Cocone.
   Record cocone {G: graph} (D: diagram G) (X: Type) :=
-    {q :> forall i, D i -> X;
-     qq : forall (i j: G) (g: G i j) (x: D i), q j (D _f g x) = q i x}.
+    { q :> forall i, D i -> X;
+      qq : forall (i j: G) (g: G i j) (x: D i), q j (D _f g x) = q i x;
+      qqq : forall i j a b p x, (qq j i b (D _f a x)) @ (qq _ _ a x) = ap (q i) (diagram2 D p x) }.
   
-  Global Arguments Build_cocone {G D X} q qq.
+  Global Arguments Build_cocone {G D X} q qq qqq.
   Global Arguments q {G D X} C i x : rename.
   Global Arguments qq {G D X} C i j g x : rename.
+  Global Arguments qqq {G D X} C i j a b p x : rename.
 
   
   Context {G: graph} {D: diagram G} {X:Type}.
   
   Definition path_cocone_naive {C1 C2: cocone D X}
-           (P := λ q', forall {i j:G} (g: G i j) (x: D i), q' j (D _f g x) = q' i x)
+             (P := λ q, forall i j (g: G i j) (x: D i), q j (D _f g x) = q i x)
+             (Q := λ q (qq: P q), forall i j a b p x, (qq j i b (D _f a x)) @ (qq _ _ a x) = ap (q i) (diagram2 D p x))
              (eq0 : q C1 = q C2)
              (eq1 : transport P eq0 (qq C1) = qq C2)
-: C1 = C2 :=
-             match eq1 in (_ = v1) return C1 = {|q := q C2; qq := v1 |} with
+             (eq2: transport (Q (q C2)) eq1 (transportD P Q eq0 _ (qqq C1)) = qqq C2)
+    : C1 = C2 :=
+        match eq2 in (_ = v2) return C1 = {|q := q C2; qq := qq C2; qqq := v2|} with
+          | idpath =>
+             match eq1 in (_ = v1) return C1 = {|q := q C2; qq := v1; qqq := transport (Q (q C2)) eq1 (transportD P Q eq0 _ (qqq C1)) |} with
                | idpath =>
-                 match eq0 in (_ = v0) return C1 = {|q := v0; qq := eq0 # (qq C1) |} with
+                 match eq0 in (_ = v0) return C1 = {|q := v0; qq := eq0 # (qq C1); qqq := transportD P Q eq0 _ (qqq C1) |} with
                    | idpath => idpath
                  end
-             end.
+             end
+        end.
 
-  Definition path_cocone {C1 C2: cocone D X}  
+             
+             
+  Definition path_cocone_eq3 {C1 C2: cocone D X}
              (eq1 : forall i,  C1 i == C2 i)
              (eq2 : forall i j g x, qq C1 i j g x @ eq1 i x = eq1 j (D _f g x) @ qq C2 i j g x)
-  : C1 = C2.
-    destruct C1 as [q pp_q], C2 as [r pp_r].
-    refine (path_cocone_naive (path_forall (λ i, path_forall (eq1 i))) _). simpl.
-    funext4 i j f x.
-    repeat rewrite transport_forall_constant.
-    rewrite transport_paths_FlFr.
-    rewrite concat_pp_p. apply moveR_Vp.
-    rewrite (ap_ap2_path_forall (λ u, D u) (λ _, λ _, X) q r eq1 i x).
-    rewrite (ap_ap2_path_forall (λ u, D u) (λ _, λ _, X) q r eq1 j (diagram1 D f x)).
-    apply eq2.
+    : Type.
+        refine (forall i j a b p x,
+                   (whiskerR (qqq C1 i j a b p x) (eq1 i x)) @ _ = _ @ (whiskerL (eq1 i ((D _f b) ((D _f a) x))) (qqq C2 i j a b p x))).
+        refine (concat_Ap (eq1 i) (diagram2 D p x)).
+        etransitivity. apply concat_pp_p.
+        etransitivity. apply whiskerL. apply eq2.
+        etransitivity. apply concat_p_pp.
+        etransitivity.
+        2: apply concat_pp_p.
+        apply whiskerR. apply eq2.
   Defined.
 
+
+  Definition path_cocone {C1 C2: cocone D X}
+             (eq1 : forall i,  C1 i == C2 i)
+             (eq2 : forall i j g x, qq C1 i j g x @ eq1 i x = eq1 j (D _f g x) @ qq C2 i j g x)
+             (eq3: forall i j a b p x,
+                 whiskerR (qqq C1 i j a b p x) (eq1 i x)
+                  @ concat_Ap (eq1 i) (diagram2 D p x)
+                 =
+                 (concat_pp_p
+                  @ whiskerL (qq C1 j i b ((D _f a) x)) (eq2 i j a x)
+                  @ concat_p_pp
+                  @ whiskerR (eq2 j i b ((D _f a) x)) (qq C2 i j a x)
+                  @ concat_pp_p)
+                  @ whiskerL (eq1 i ((D _f b) ((D _f a) x))) (qqq C2 i j a b p x))
+    : C1 = C2.
+  Proof.
+    destruct C1 as [q1 qq1 qqq1], C2 as [q2 qq2 qqq2].
+    refine (path_cocone_naive _ _ _).
+    - clear eq2 eq3. funext i x. apply eq1.
+    - clear eq3. cbn.
+      funext4 i j g x.
+      rewrite !transport_forall_constant.
+      rewrite transport_paths_FlFr. 
+      rewrite concat_pp_p. apply moveR_Vp.
+      rewrite (ap_ap2_path_forall (λ u, D u) (λ _, λ _, X) _ _ eq1 i x).
+      rewrite (ap_ap2_path_forall (λ u, D u) (λ _, λ _, X) _ _ eq1 j (diagram1 D g x)).
+      apply eq2.
+    - cbn. admit.
+  Defined.
+
+  
   Definition postcompose_cocone (C: cocone D X) {Y: Type} : (X -> Y) -> cocone D Y.
     intros f.
-    refine (Build_cocone _ _).
+    refine (Build_cocone _ _ _).
     - intros i. exact (f o (C i)).
     - intros i j g x. exact (ap f (qq _ i j g x)).
+    - intros i j a b p x. cbn. etransitivity.
+      symmetry; apply ap_pp. etransitivity.
+      2: symmetry; apply ap_compose.
+      apply ap. apply qqq.
   Defined.
 
   Definition is_universal (C: cocone D X)
@@ -78,62 +122,89 @@ Module Export colimit_HIT.
 
   Global Arguments colim {G D} i x.
   
-  Axiom pp : forall {G: graph} {D: diagram G} (i j: G) (f : G i j) (x: D i),
-               colim j (D _f f x) = colim i x.
+  Axiom pp : forall {G: graph} {D: diagram G} (i j: G) (g : G i j) (x: D i),
+      colim j (D _f g x) = colim i x.
 
+  Axiom ppp : forall {G: graph} {D: diagram G} i j a b (p: graph2 G i j a b) (x: D i),
+      (pp _ _ b (D _f a x)) @ (pp _ _ a x) = ap (colim i) (diagram2 D p x).
+
+
+  (* Definition colimit_ind {G: graph} {D: diagram G} (P: colimit D -> Type) *)
+  (*            (p'  : forall i x, P (colim i x)) *)
+  (*            (pp' : forall i j (g: G i j) x, (pp _ _ g x) # (p' j (D _f g x)) = p' i x) *)
+  (*            i j a b (a' := D _f a) (b' := D _f b) (p: graph2 G i j a b) (x: D i) : Type. *)
+  (* Proof. *)
+  (*   assert (transport (λ x0 : D i, P (colim i x0)) (diagram2 D p x) *)
+  (*                     (p' i ((D _f b) ((D _f a) x))) = p' i x). *)
+  (*   refine (apD (p' i) (diagram2 D p x)). *)
+  (*   exact (apD011 (C := λ i x, P (colim i x)) p' 1 (diagram2 D p x)). cbn. *)
+  
   Definition colimit_ind {G: graph} {D: diagram G} (P: colimit D -> Type)
-             (q : forall i x, P (colim i x))
-             (pp_q : forall (i j: G) (g: G i j) (x: D i), (@pp G D i j g x) # (q j (D _f g x)) = q i x)
-  : forall w, P w
-    := fun w => match w with colim i a => fun _ => q _ a end pp_q.
+             (p'  : forall i x, P (colim i x))
+             (pp' : forall i j (g: G i j) x, (pp _ _ g x) # (p' j (D _f g x)) = p' i x)
+             (ppp': forall i j a b (a' := D _f a) (b' := D _f b) (p: graph2 G i j a b) x,
+                 transport_compose P (colim i) (diagram2 D p x) (p' i (b' (a' x)))
+                   @  transport2 P (ppp i j a b p x)^ (p' i (b' (a' x)))
+                   @  transport_pp P (pp j i b (a' x)) (pp i j a x) (p' i (b' (a' x)))
+                   @  ap (transport P (pp i j a x)) (pp' j i b (a' x))
+                   @  pp' i j a x 
+                 =
+                 apD (p' i) (diagram2 D p x))
+    : forall w, P w
+    := fun w => match w with colim i a => fun _ _ => p' _ a end pp' ppp'.
 
-  Axiom colimit_ind_beta_pp
-  : forall {G: graph} {D: diagram G} (P: colimit D -> Type)
-           (q : forall i x, P (colim i x))
-           (pp_q : forall (i j: G) (g: G i j) (x: D i), (@pp G D i j g x) # (q _ (D _f g x)) = q _ x)
-           (i j: G) (g: G i j) (x: D i),
-      apD (colimit_ind P q pp_q) (pp i j g x) = pp_q i j g x.
+  Axiom colimit_ind_beta_pp : forall
+      {G: graph} {D: diagram G} (P: colimit D -> Type) p' pp' ppp' (i j: G) (g: G i j) (x: D i),
+      apD (colimit_ind P p' pp' ppp') (pp i j g x) = pp' i j g x.
 
+  
   Definition colimit_rec {G: graph} {D: diagram G} (P: Type) (C: cocone D P)
-  : colimit D -> P.
-    refine (colimit_ind _ _ _).
+    : colimit D -> P.
+  Proof.
+    refine (colimit_ind _ _ _ _).
     - exact C.
     - intros i j g x.
       exact ((transport_const (pp i j g x) (q _ _ (D _f g x))) @ (qq _ i j g x)).
+    - intros i j a b a' b' p x. cbn.
+      Open Scope long_path_scope.
+      symmetry; etransitivity. apply apD_const.
+      rewrite <- qqq. rewrite <- !concat_pp_p.
+      refine (ap011 concat _ 1). admit.
   Defined.
   
   Definition colimit_rec_beta_pp {G: graph} {D: diagram G} (P: Type) (C: cocone D P)
              (i j: G) (g: G i j) (x: D i)
   : ap (colimit_rec P C) (pp i j g x) = qq C i j g x.
-    unfold colimit_rec, colimit_ind.
-    eapply (cancelL (transport_const (pp i j g x) _)).
-    refine ((apD_const (colimit_ind (λ _ : colimit D, P) C _) (pp i j g x))^ @ _).
-    refine (colimit_ind_beta_pp (λ _, P) C _ i j g x).
-  Defined.
+    (* unfold colimit_rec, colimit_ind. *)
+    (* eapply (cancelL (transport_const (pp i j g x) _)). *)
+    (* refine ((apD_const (colimit_ind (λ _ : colimit D, P) C _) (pp i j g x))^ @ _). *)
+    (* refine (colimit_ind_beta_pp (λ _, P) C _ i j g x). *)
+  Admitted.
 
   Definition cocone_colimit {G: graph} (D: diagram G) : cocone D (colimit D)
-    := Build_cocone colim pp.
+    := Build_cocone colim pp ppp.
   
   Lemma is_universal_colimit {G: graph} (D: diagram G)
   : is_universal (cocone_colimit D).
     intro Y; simpl.
     refine (isequiv_adjointify (colimit_rec Y) _ _).
-    - intros C. refine (path_cocone _ _).
-      intros i x. reflexivity.
-      intros i j f x. simpl. hott_simpl.
-      apply colimit_rec_beta_pp.
-    - intro f. apply path_forall.
-      refine (colimit_ind  _ _ _).
-      intros i x. reflexivity.
-      intros i j g x. simpl.
-      rewrite transport_paths_FlFr.
-      rewrite colimit_rec_beta_pp. hott_simpl.
+    (* - intros C. refine (path_cocone _ _). *)
+    (*   intros i x. reflexivity. *)
+    (*   intros i j f x. simpl. hott_simpl. *)
+    (*   apply colimit_rec_beta_pp. *)
+    (* - intro f. apply path_forall. *)
+    (*   refine (colimit_ind  _ _ _). *)
+    (*   intros i x. reflexivity. *)
+    (*   intros i j g x. simpl. *)
+    (*   rewrite transport_paths_FlFr. *)
+    (*   rewrite colimit_rec_beta_pp. hott_simpl. *)
+    admit. admit.
   Defined.
 
   Definition is_colimit_colimit {G: graph} (D: diagram G) : is_colimit D (colimit D)
     := Build_is_colimit _ (is_universal_colimit D).
 End colimit_HIT.
-
+(*
 
 
 
@@ -313,3 +384,4 @@ Section TransportColimit.
     destruct p; reflexivity.
   Defined.
 End TransportColimit.
+*)

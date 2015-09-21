@@ -9,19 +9,22 @@ Context `{Funext}.
 Section Diagram.
   Record graph :=
     { graph0 :> Type;
-      graph1 :> graph0 -> graph0 -> Type }.
+      graph1 :> graph0 -> graph0 -> Type;
+      graph2 : forall i j, (graph1 i j) -> (graph1 j i) -> Type }.
 
   Record diagram (G : graph) :=
     { diagram0 :> G -> Type;
-      diagram1 : forall (i j : G), G i j -> (diagram0 i -> diagram0 j) }.
+      diagram1 : forall (i j : G), G i j -> (diagram0 i -> diagram0 j);
+      diagram2 : forall i j a b, graph2 _ i j a b -> (diagram1 _ _ b) o (diagram1 _ _ a) == idmap }.
   
   Global Arguments diagram0 [G] D i : rename.
   Global Arguments diagram1 [G] D [i j] g x : rename.
+  Global Arguments diagram2 [G] D [i j a b] p x : rename.
 End Diagram.
 
 Notation "D '_f' g" := (diagram1 D g) (at level 10).
 
-
+(*
 Section DiagramMap.
   Context {G: graph}.
   
@@ -124,4 +127,4 @@ End DiagramMap.
 Notation "D1 ≃ D2" := (diagram_equiv D1 D2) (at level 10).
 
 
-(*  *)
+*)
