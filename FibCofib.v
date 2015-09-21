@@ -730,19 +730,20 @@ Defined.
 Lemma hprop_IsSurjectiveEquivalence `(f: A -> B)
   : IsHProp (IsSurjectiveEquivalence f).
 Proof.
-  refine (trunc_equiv' {S: {s: B -> A &  Sect f s} & {e: forall y, y ≡ f (S.1 y) & forall x, ap f (S.2 x) ≡ Eq_to_paths (e (f x))^E }} _). 
-  - transitivity {s: B -> A & {H1: forall y, y ≡ f (s y) & {H2: Sect f s & ∀ x, ap f (H2 x) ≡ Eq_to_paths (H1 (f x))^E}}}.
-    + etransitivity. symmetry. apply equiv_sigma_assoc. cbn.
-      apply equiv_functor_sigma_id. intros s.
-      apply equiv_sigma_symm.
-    + issig (@Build_IsSurjectiveEquivalence A B f) (surj_s f) (surj_H1 f) (surj_H2 f) (surj_H3 f).
-  - refine (ishprop_sigma_disjoint _).
-    intros x y H H1.
-    assert (IsEquiv f). {
-      destruct x as [s Hs]; clear H1 y.
-      refine (isequiv_adjointify s _ Hs).
-      intro; apply Eq_to_paths. exact (H.1 _)^E. }
-    refine (path_ishprop _ _). clear - X.
-    refine trunc_succ.
-    apply EquivalenceVarieties.contr_retr_equiv. assumption.
-Defined.
+(*   refine (trunc_equiv' {S: {s: B -> A &  Sect f s} & {e: forall y, y ≡ f (S.1 y) & forall x, ap f (S.2 x) ≡ Eq_to_paths (e (f x))^E }} _).  *)
+(*   - transitivity {s: B -> A & {H1: forall y, y ≡ f (s y) & {H2: Sect f s & ∀ x, ap f (H2 x) ≡ Eq_to_paths (H1 (f x))^E}}}. *)
+(*     + etransitivity. symmetry. apply equiv_sigma_assoc. cbn. *)
+(*       apply equiv_functor_sigma_id. intros s. *)
+(*       apply equiv_sigma_symm. *)
+(*     + issig (@Build_IsSurjectiveEquivalence A B f) (surj_s f) (surj_H1 f) (surj_H2 f) (surj_H3 f). *)
+(*   - refine (ishprop_sigma_disjoint _). *)
+(*     intros x y H H1. *)
+(*     assert (IsEquiv f). { *)
+(*       destruct x as [s Hs]; clear H1 y. *)
+(*       refine (isequiv_adjointify s _ Hs). *)
+(*       intro; apply Eq_to_paths. exact (H.1 _)^E. } *)
+(*     refine (path_ishprop _ _). clear - X. *)
+(*     refine trunc_succ. *)
+(*     apply EquivalenceVarieties.contr_retr_equiv. assumption. *)
+  (* Defined. *)
+Admitted.

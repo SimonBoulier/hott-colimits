@@ -96,11 +96,3 @@ Lemma ap_ap2_path_forall `{HF:Funext} (X:Type) (Y : X -> Type) (Z:forall x:X, Y 
   apply ap_ap_path_forall.
 Qed.
 Unset Implicit Arguments.
-
-
-Require Import StrictEq.EOverture StrictEq.ETypes. 
-Lemma Etransport_pr2_pr1 `(P: Y -> X -> Type) `(Q: X -> Type) {w z: sig (λ y, sig (P y))} (e: w ≡ z) (u: Q z.2.1)
-  : Etransport (λ x : ∃ (y : Y) x, P y x, Q (x.2).1) e^E u
-        ≡ Etransport Q (((Etransport_sigma' e ..1E w.2)^E E@ e ..2E)^E) ..1E u.
-  destruct e; reflexivity.
-Defined.
