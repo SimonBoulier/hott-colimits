@@ -245,8 +245,10 @@ Section Acyclique.
     { surj_s : Y -> X;
       surj_H1 : forall y, y ≡ g (surj_s y);
       surj_H2 : Sect g surj_s;
-      surj_H3 : (* forall x, ap g (surj_H2 x) ≡ Eq_to_paths (surj_H1 (g x))^E  *)
-        forall y, surj_H2 (surj_s y) ≡ Eq_to_paths (Eap surj_s (surj_H1 y)^E)
+      surj_H3 :
+        forall x, Etransport (λ u, u = g x) (surj_H1 (g x))^E (ap g (surj_H2 x)) ≡ 1
+        (* forall x, ap g (surj_H2 x) ≡ Eq_to_paths (surj_H1 (g x))^E *)
+        (* forall y, surj_H2 (surj_s y) ≡ Eq_to_paths (Eap surj_s (surj_H1 y)^E) *)
     }.
   
   Global Arguments Build_IsSurjectiveEquivalence {X Y g} s H1 H2 H3 : rename.
@@ -356,7 +358,7 @@ Section Facto_C_AF.
     refine (Build_IsSurjectiveEquivalence (λ y, (y; base y)) _ _ _);
       intro; simpl; try reflexivity.
     refine (path_sigma' _ 1 _); simpl. apply Cyl_Contr.
-    reflexivity.
+    admit.
   Defined.
 End Facto_C_AF.
 
@@ -396,6 +398,32 @@ Section LP.
     refine (LP_Retract f _ f g _ H _).
     refine (Build_Retract idmap idmap idmap idmap _ _ _ _); intro; reflexivity.
     clear - Hf. intros F G H.
+
+    (* destruct Hf as [r Hr1 Hr2 Hr3]. *)
+  (*   pose (PB := {a': A' & {w: sig (hfiber k) & G a' ≡ w.1}}). *)
+  (*   transparent assert (Ɣ: (A' -> PB)). { *)
+  (*     intro a'. exists a'. *)
+  (*     refine (exist _ _ _). *)
+  (*     exists (G a'). refine (_ # (F (r a')).2). *)
+  (*     etransitivity. eapply Eq_to_paths. *)
+  (*     apply H. by apply ap. *)
+  (*     reflexivity. } *)
+  (*   pose (π1 := λ w: PB, w.1). *)
+  (*   pose (π2 := λ w: PB, w.2.1). *)
+  (*   exists (π2 o Ɣ). split. *)
+  (*   - intro x. etransitivity (π2 (f x; (F x; _))). *)
+  (*     apply Eap. refine (eq_sigma' _ E1 _); cbn. *)
+  (*     refine (eq_sigma' _ _ _). *)
+  (*     refine (eq_sigma' _ _ _). by symmetry. *)
+  (*     rewrite (Hr3 x). destruct (Hr1 x). cbn. *)
+  (*     destruct (H x). reflexivity. *)
+  (*     apply Eq_UIP. *)
+  (*     reflexivity. *)
+  (*   - intro; reflexivity. *)
+  (*     Grab Existential Variables. *)
+  (*     cbn; by symmetry. *)
+  (* Defined. *)
+    
     pose (α := (λ w, (G w.1; w.2)) : {a : A' & {x : X & k x = G a}} -> sig (hfiber k)).
     transparent assert (β : (A -> {a : A' & {x : X & k x = G a}})).
       refine (λ a : A, (f a; _ E# (F a).2)). apply H.
@@ -747,3 +775,135 @@ Proof.
 (*     apply EquivalenceVarieties.contr_retr_equiv. assumption. *)
   (* Defined. *)
 Admitted.
+
+Section Surj.
+  Record IsInj `(f: A -> B) :=
+    { j': B -> sig (hfiber f);
+      Hj'1: forall x, j' (f x) ≡ (f x; (x; 1));
+      Hj'2: pr1 o j' ≡≡ idmap }.
+
+
+  Lemma IsInj_ok `(f: A -> B) : IsInj f <-> IsInjectiveEquivalence f.
+  Proof.
+    split.
+    - intros [j Hj1 Hj2].
+      refine (Build_IsInjectiveEquivalence (λ y, (j y).2.1) _ _ _).
+      + intro x. exact (Eap (λ w, w.2.1) (Hj1 x)^E).
+      + intro y. transitivity (j y).1.
+        exact (j y).2.2. by apply Eq_to_paths.
+      + intro; cbn.
+        set (e := (Hj1 x)^E ..2E).
+        unfold hfiber in e.
+        rewrite (@Etransport_sigma' B A (λ y x, f x = y) _ _ _ (x;1)) in e.
+        cbn in e.
+        rewrite (Etransport_paths_r1 ((Hj1 x)^E) ..1E) in e.
+        rewrite <- (e ..2E); cbn.
+        rewrite Etransport_paths_FlE.
+        rewrite ETP_concat. apply Eap, Eq_UIP.
+    - intros [r Hr1 Hr2 Hr3].
+      refine (Build_IsInj _ _ _ _ _ _).
+      + intro y. by refine (y; (r y; _)).
+      + intro x; cbn.
+        refine (eq_sigma' _ E1 _); cbn.
+        refine (eq_sigma' _ _ _). symmetry; apply Hr1.
+        rewrite (Hr3 x). rewrite Etransport_paths_FlE.
+        change (Eq_to_paths (Eap f ((Hr1 x)^E)^E E@ Eap f (Hr1 x)^E) ≡ Eq_to_paths E1).
+        apply Eap, Eq_UIP.
+      + intro; reflexivity.
+  Defined.
+
+
+  Record IsSurj `(f: A -> B) :=
+    { j: sig (Cyl f) -> A;
+      Hj1: @pr1 _ (Cyl f) ≡≡ f o j;
+      Hj2: forall x, j (f x; top x) ≡ x }.
+
+
+  (** Naturality of [ap]. *)
+  Definition Econcat_Ap {A B: Type} {f g: A -> B} (e: forall x, f x ≡ g x) {x y: A} (q: x = y) :
+    Etransport (λ v, _ = v) (e y) (ap f q) ≡ Etransport (λ u, u = _) (e x)^E (ap g q).
+  Proof.
+    destruct (eq_forall _ _ e).
+    assert (e y ≡ E1). apply Eq_UIP.
+    rewrite X; clear X.
+    assert (e x ≡ E1). apply Eq_UIP.
+    rewrite X; clear X.
+    reflexivity.
+  Defined.
+
+
+  Lemma Etransport_l_pp `(p: x = y :> A) `(q: y = z) `(e: x ≡ x')
+    : Etransport (λ u, u = _) e (p @ q) ≡ (Etransport (λ u, u = _) e p) @ q.
+  Proof.
+      by destruct e.
+  Defined.
+  
+
+  Lemma IsSurj_ok `(f: A -> B) : IsSurj f <-> IsSurjectiveEquivalence f.
+  Proof.
+    split.
+    - intros [j Hj1 Hj2].
+      refine (Build_IsSurjectiveEquivalence (λ y, j (y; base y)) _ _ _).
+      + intro y. exact (Hj1 (y; _)).
+      + intro x. transitivity (j (f x; top x)).
+        apply ap. refine (path_sigma' _ 1 _).
+        symmetry; apply cyl_eq.
+          by apply Eq_to_paths.
+      + intro; cbn.
+        rewrite ap_pp, <- ap_compose. (* !!! *)
+        set (e := path_sigma' (Cyl f) 1 (cyl_eq x)^).
+        rewrite ETP_ap, Etransport_l_pp.
+        rewrite <- (Econcat_Ap Hj1 e).
+        change (Etransport (λ v : B, (f x; base (f x)).1 = v) (Hj1 (f x; top x))
+                  (path_sigma (Cyl f) (f x; base (f x)) (f x; top x) 1 (cyl_eq x)^)..1
+                           @' Eq_to_paths (Eap f (Hj2 x)) ≡ 1).
+        clear e. rewrite pr1_path_sigma. (* !!! *)
+        cbn. rewrite Etransport_paths_r1.
+        rewrite ETP_concat.
+        exact (Eap Eq_to_paths (Eq_UIP _ E1)).
+    - intros [s Hs1 Hs2 _].
+      refine (Build_IsSurj _ _ _ _ _ _).
+      + refine (sig_cyl_rec _ idmap s _).
+        intro x. by symmetry.
+      + intros [y w]. cbn.
+
+        symmetry. transitivity (sig_cyl_rec B f (f o s) (λ x, ap f (Hs2 x)^) (y;w)).
+        admit.
+        unfold sig_cyl_rec, Cyl_rec_const.
+
+
+        revert w. revert y.
+        refine (Cyl_ind _ _ _ _).
+        * reflexivity.
+        * cbn. assumption.
+        * cbn. intro; apply hprop_eq.
+      + reflexivity.
+  Defined.
+
+  Lemma qsdkjfh `(f: A -> B) : IsSurjectiveEquivalence0 f -> IsSurjectiveEquivalence f.
+  Proof.
+    intros [s Hs1 Hs2].
+    set (j := sig_cyl_rec A (λ x0 : A, x0) s (λ x0 : A, (Hs2 x0)^)).
+    refine (Build_IsSurjectiveEquivalence s Hs1 _ _).
+    - intro x.
+      exact (ap j (path_sigma' _ 1 (cyl_eq x)^)).
+    - intro x; cbn.
+      rewrite <- (ap_compose j f (path_sigma' (Cyl f) 1 (cyl_eq x)^)). (* !!! *)
+      transparent assert (H: (forall x, x.1 ≡ f (j x))). {
+        clear x. refine (sig_cyl_ind _ _ _ _).
+        + reflexivity.
+        + exact Hs1.
+        + cbn. intro x.
+          rewrite (transport_paths_Fr (x:=f x) (g := λ w, f x ≡ f (j (f x; w)))).
+
+          apply hprop_eq. }
+      etransitivity.
+      refine (Econcat_Ap H (path_sigma' (Cyl f) 1 (cyl_eq x)^))^E.
+      change (Etransport (λ v : B, (λ x0 : ∃ x, Cyl f x, x0.1) (f x; base (f x)) = v)
+                         (H (f x; top x))
+                         (path_sigma (Cyl f) (f x; base (f x)) (f x; top x) 1 (cyl_eq x)^)..1
+                         ≡ Eq_to_paths E1).
+      rewrite pr1_path_sigma.   (* !!! *)
+      rewrite Etransport_paths_r1.
+      apply Eap, Eq_UIP.
+  Defined.
