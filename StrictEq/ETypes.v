@@ -1,6 +1,7 @@
-Require Import HoTT.Basics.Overture.
+Require Import HoTT.Basics.Overture Utf8_core.
 Require Import StrictEq.EOverture StrictEq.EPathGroupoids.
 
+Generalizable All Variables.
 Open Scope path.
 
 (* Contr *)
@@ -263,3 +264,39 @@ Lemma ETP_ap {A B: Type} (f: A -> B) {x y: A} (p: x ≡ y)
 Proof.
     by destruct p.
 Defined.
+
+
+
+Definition concat_Ep `(e: x ≡ y :> A) `(p: y = z) : x = z
+  := Etransport (λ u, u = z) e^E p.
+
+Definition concat_EVp `(e: y ≡ x :> A) `(p: y = z) : x = z
+  := Etransport (λ u, u = z) e p.
+
+Definition concat_pE `(p: x = y :> A) `(e: y ≡ z) : x = z
+  := Etransport (λ v, x = v) e p.
+
+Definition concat_EpE `(e1: x' ≡ x :> A) `(p: x = y) `(e2: y ≡ y') : x' = y'
+  := concat_pE (concat_Ep e1 p) e2.
+
+Definition concat_EVpE `(e1: x ≡ x' :> A) `(p: x = y) `(e2: y ≡ y') : x' = y'
+  := concat_pE (concat_EVp e1 p) e2.
+
+Lemma concat_EVpE_pp `(e1: x ≡ x' :> A) `(p: x = y) `(q: y = z) `(e2: z ≡ z')
+  : concat_EVpE e1 (p @ q) e2 ≡ (concat_EVp e1 p) @ (concat_pE q e2).
+Proof.
+    by destruct e1, e2.
+Defined.
+
+
+
+
+(* Sum *)
+
+Definition Etransport_sum {A : Type} {P Q : A -> Type} {a a' : A} (p : a ≡ a')
+           (z : P a + Q a)
+: Etransport (fun a => P a + Q a) p z ≡ match z with
+                                         | inl z' => inl (p E# z')
+                                         | inr z' => inr (p E# z')
+                                       end
+  := match p with refl => match z with inl _ => E1 | inr _ => E1 end end.

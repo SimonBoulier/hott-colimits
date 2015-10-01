@@ -4,6 +4,8 @@ Require Import HoTT.Basics.Overture.
 Axiom admit : forall {a}, a.
 Tactic Notation "admit" := exact admit.
 
+Tactic Notation "sym" simple_intropattern(H) := symmetry; apply H.
+
 Global Open Scope path_scope.
 
 

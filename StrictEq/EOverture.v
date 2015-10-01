@@ -160,16 +160,16 @@ Defined.
 Axiom isiso_EapD10 : forall (A : Type) (P : A -> Type) f g, IsIso (@EapD10 A P f g).
 Global Existing Instance isiso_EapD10.
 
-Definition eq_forall {A : Type} {P : A -> Type} (f g : forall x : A, P x) :
+Definition eq_forall {A : Type} {P : A -> Type} {f g : forall x : A, P x} :
   f ≡≡ g -> f ≡ g
   :=
   (@EapD10 A P f g)^-1E.
-Global Arguments eq_forall {A%type_scope P} (f g)%function_scope _.
+Global Arguments eq_forall {A%type_scope P} {f g}%function_scope _.
 
 Definition eq_forall2 {A B : Type} {P : A -> B -> Type} (f g : forall x y, P x y) :
   (forall x y, f x y ≡ g x y) -> f ≡ g
   :=
-  (fun E => eq_forall f g (fun x => eq_forall (f x) (g x) (E x))).
+  (fun E => eq_forall (fun x => eq_forall (E x))).
 Global Arguments eq_forall2 {A B}%type_scope {P} (f g)%function_scope _.
 
 

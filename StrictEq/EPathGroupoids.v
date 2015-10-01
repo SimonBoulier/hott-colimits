@@ -56,6 +56,55 @@ Definition Etransport_Vp {A : Type} (P : A -> Type) {x y : A} (p : x ≡ y) (z :
   := (Etransport_pp P p p^E z)^E
   E@ Eap (fun r => Etransport P r z) (Econcat_pV p).
 
+Definition Etransport_const {A B : Type} {x1 x2 : A} (p : x1 ≡ x2) (y : B)
+  : Etransport (fun x => B) p y ≡ y.
+Proof.
+  destruct p.  exact E1.
+Defined.
+
+
+(** Dependent transport in doubly dependent types and more. *)
+
+Definition EtransportD {A : Type} (B : A -> Type) (C : forall a:A, B a -> Type)
+  {x1 x2 : A} (p : x1 ≡ x2) (y : B x1) (z : C x1 y)
+  : C x2 (p E# y)
+  :=
+  match p with refl => z end.
+
+Definition EtransportD2 {A : Type} (B C : A -> Type) (D : forall a:A, B a -> C a -> Type)
+  {x1 x2 : A} (p : x1 ≡ x2) (y : B x1) (z : C x1) (w : D x1 y z)
+  : D x2 (p E# y) (p E# z)
+  :=
+  match p with refl => w end.
+
+(** *** [ap] for multivariable functions *)
+
+Definition Eap011 {A B C} (f : A -> B -> C) {x x' y y'} (p : x ≡ x') (q : y ≡ y')
+: f x y ≡ f x' y'
+:= Eap11 (Eap f p) q.
+
+Definition Eap011D {A B C} (f : forall (a:A), B a -> C)
+           {x x'} (p : x ≡ x') {y y'} (q : p E# y ≡ y')
+: f x y ≡ f x' y'.
+Proof.
+  destruct p, q; reflexivity.
+Defined.
+
+Definition Eap01D1 {A B C} (f : forall (a:A), B a -> C a)
+           {x x'} (p : x ≡ x') {y y'} (q : p E# y ≡ y')
+: Etransport C p (f x y) ≡ f x' y'.
+Proof.
+  destruct p, q; reflexivity.
+Defined.
+
+Definition EapD011 {A B C} (f : forall (a:A) (b:B a), C a b)
+           {x x'} (p : x ≡ x') {y y'} (q : p E# y ≡ y')
+: Etransport (C x') q (EtransportD B C p y (f x y)) ≡ f x' y'.
+Proof.
+  destruct p, q; reflexivity.
+Defined.
+
+
 
 Definition EmoveR_transport_p {A : Type} (P : A -> Type) {x y : A}
   (p : x ≡ y) (u : P x) (v : P y)

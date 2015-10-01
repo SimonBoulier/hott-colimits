@@ -25,7 +25,7 @@ Section Cocone.
              match eq1 in (_ = v1) return C1 = {|q := q C2; qq := v1 |} with
                | idpath =>
                  match eq0 in (_ = v0) return C1 = {|q := v0; qq := eq0 # (qq C1) |} with
-                   | idpath => idpath
+                   | idpath => 1
                  end
              end.
 
