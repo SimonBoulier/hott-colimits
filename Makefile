@@ -97,6 +97,7 @@ endif
 ######################
 
 VFILES:=FibCofib.v\
+  Cylinder_Pushout.v\
   StrictEq/ETypes.v\
   StrictEq/EPathGroupoids.v\
   StrictEq/EOverture.v\

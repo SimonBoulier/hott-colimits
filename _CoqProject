@@ -19,4 +19,5 @@ StrictEq/EOverture.v
 StrictEq/EPathGroupoids.v
 StrictEq/ETypes.v
 
+Cylinder_Pushout.v
 FibCofib.v

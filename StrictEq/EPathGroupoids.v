@@ -1,6 +1,7 @@
-Require Import HoTT.Basics.Overture.
+Require Import HoTT.Basics.Overture Utf8_core.
 Require Import StrictEq.EOverture.
 
+Generalizable All Variables.
 Open Local Scope path_scope.
 
 Definition Econcat_p1 {A : Type} {x y : A} (p : x ≡ y) :
@@ -21,6 +22,35 @@ Definition Econcat_pV {A : Type} {x y : A} (p : x ≡ y) :
 Definition Econcat_Vp {A : Type} {x y : A} (p : x ≡ y) :
   p^E E@ p ≡ E1 :=
   match p with refl => E1 end.
+
+
+Lemma Eap_compose {A B C} (f: A -> B) (g: B -> C) `(e: x ≡ y :> A)
+  : Eap (g o f) e ≡ Eap g (Eap f e).
+Proof.
+    by destruct e.
+Defined.
+
+Lemma Eap_V `(f: A -> B) `(e: x ≡ y)
+  : Eap f e^E ≡ (Eap f e)^E.
+Proof.
+    by destruct e.
+Defined.
+
+
+Definition concat_Ep `(e: x ≡ y :> A) `(p: y = z) : x = z
+  := Etransport (λ u, u = z) e^E p.
+
+Definition concat_EVp `(e: y ≡ x :> A) `(p: y = z) : x = z
+  := Etransport (λ u, u = z) e p.
+
+Definition concat_pE `(p: x = y :> A) `(e: y ≡ z) : x = z
+  := Etransport (λ v, x = v) e p.
+
+Definition concat_EpE `(e1: x' ≡ x :> A) `(p: x = y) `(e2: y ≡ y') : x' = y'
+  := concat_pE (concat_Ep e1 p) e2.
+
+Definition concat_EVpE `(e1: x ≡ x' :> A) `(p: x = y) `(e2: y ≡ y') : x' = y'
+  := concat_pE (concat_EVp e1 p) e2.
 
 
 Definition Etransport_compose {A B : Type} {x y : A} (P : B -> Type) (f : A -> B) 
@@ -137,3 +167,79 @@ Proof.
   destruct p.
   exact idmap.
 Defined.
+
+
+
+  Definition Econcat_Ap {A B: Type} {f g: A -> B} (e: forall x, f x ≡ g x) {x y: A} (q: x = y) :
+    concat_pE (ap f q) (e y) ≡ concat_Ep (e x) (ap g q).
+  Proof.
+    destruct (eq_forall e).
+    assert (e y ≡ E1). apply Eq_UIP.
+    rewrite X; clear X.
+    assert (e x ≡ E1). apply Eq_UIP.
+    rewrite X; clear X.
+    reflexivity.
+  Defined.
+
+  
+  Definition concat_Ep_p `(e: x ≡ x' :> A) `(p: x' = y) `(q: y = z)
+    : (concat_Ep e p) @ q ≡ concat_Ep e (p @ q).
+  Proof.
+      by destruct e.
+  Defined.
+
+  Definition concat_pE_p `(p: x = y :> A) `(e: y ≡ y') `(q: y' = z)
+    : concat_pE p e @ q  ≡ p @ (concat_Ep e q).
+  Proof.
+      by destruct e.
+  Defined.
+
+  Definition concat_EE_p `(e1: x ≡ x' :> A) `(e2: x' ≡ x'') `(p: x'' = y)
+    : concat_Ep (Econcat e1 e2) p ≡ concat_Ep e1 (concat_Ep e2 p).
+  Proof.
+      by destruct e1, e2.
+  Defined.
+
+  Definition concat_pp_E `(p: x = y :> A) `(q: y = z) `(e: z ≡ z')
+    : concat_pE (p @ q) e ≡ p @ (concat_pE q e).
+  Proof.
+      by destruct e.
+  Defined.
+
+  Definition concat_Ep_E `(e1: x ≡ x' :> A) `(p: x' = y) `(e2: y ≡ y')
+    : concat_pE (concat_Ep e1 p) e2 ≡ concat_Ep e1 (concat_pE p e2).
+  Proof.
+      by destruct e1, e2.
+  Defined.
+  
+  Definition concat_pE_E `(p: x = y :> A) `(e1: y ≡ y') `(e2: y' ≡ y'')
+    : concat_pE (concat_pE p e1) e2 ≡ concat_pE p (e1 E@ e2).
+  Proof.
+      by destruct e1, e2.
+  Defined.
+
+  Definition concat_EE_E `(e1: x1 ≡ x2 :> A) `(e2: x2 ≡ x3) `(e3: x3 ≡ x4)
+    : Econcat (Econcat e1 e2) e3 ≡ Econcat e1 (Econcat e2 e3).
+  Proof.
+      by destruct e1, e2, e3.
+  Defined.
+
+  
+  Definition concat_Ep_move `(e: x ≡ x' :> A) `(p: x' = y) (q: x = y)
+    : concat_EVp e q ≡ p -> q ≡ concat_Ep e p.
+  Proof.
+      by destruct e.
+  Defined.
+  
+  
+  Definition ap_concat_EVp `(f: A -> B) `(e: y ≡ x :> A) `(p: y = z)
+    : ap f (concat_EVp e p) ≡ concat_EVp (Eap f e) (ap f p).
+  Proof.
+      by destruct e.
+  Defined.
+
+  Definition ap_concat_pE `(f: A -> B) `(p: x = y :> A) `(e: y ≡ y')
+    : ap f (concat_pE p e) ≡ concat_pE (ap f p) (Eap f e).
+  Proof.
+      by destruct e.
+  Defined.

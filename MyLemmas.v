@@ -3,7 +3,8 @@ Require Import MyTacs.
 Generalizable All Variables.
 
 Global Arguments idpath {A} a.
-Notation π1 P := (@pr1 _ P).
+
+Definition π1 {A} P := @pr1 A P.
 
 
 
@@ -17,15 +18,6 @@ Lemma ap_apply_truc_2 {A B D: Type} {C: B -> Type} (M: A -> forall b:B, C b -> D
   destruct p; reflexivity.
 Defined.
 
-Lemma ap_path_sigma {A B: Type} (P: A -> Type) (F: forall a: A, P a -> B) {x x': A} {y: P x} {y': P x'} (p: x = x') (q: p # y = y')
-: ap (λ w, F w.1 w.2) (path_sigma P (x; y) (x'; y') p q) = ap011D F p q.
-  destruct p, q; reflexivity.
-Defined.
-
-Lemma ap_path_sigma_1 {A B: Type} {P: A -> Type} (F: forall a: A, P a -> B) (a: A) {x y: P a} (p: x = y)
-: ap (λ w, F w.1 w.2) (path_sigma' P 1 p) = ap (λ z, F a z) p.
-  destruct p; reflexivity.
-Defined.
 
 
 Lemma apD_pp `{P: A -> Type} (f: forall a, P a) {x y z: A} (p: x = y) (q: y = z)

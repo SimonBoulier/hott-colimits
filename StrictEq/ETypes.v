@@ -1,4 +1,4 @@
-Require Import HoTT.Basics.Overture Utf8_core.
+Require Import HoTT.Basics HoTT.Types.Sigma Utf8_core.
 Require Import StrictEq.EOverture StrictEq.EPathGroupoids.
 
 Generalizable All Variables.
@@ -136,6 +136,24 @@ Defined.
 (*   destruct p. reflexivity. *)
 (* Defined. *)
 
+Lemma ap_path_sigma {A B: Type} (P: A -> Type) (F: forall a: A, P a -> B) {x x': A} {y: P x} {y': P x'} (p: x = x') (q: p # y = y')
+  : ap (λ w, F w.1 w.2) (path_sigma P (x; y) (x'; y') p q) ≡ ap011D F p q.
+Admitted.
+
+Definition ap_path_sigma_1 {A B: Type} (P: A -> Type) (F: forall a: A, P a -> B) (x: A) {y y': P x} (q: y = y')
+  : ap (λ w, F w.1 w.2) (path_sigma' P 1 q) ≡ ap (F x) q
+  := ap_path_sigma P F 1 q.
+
+Definition ap_path_sigma_pr1 `(P: A -> Type) {x x': A} {y: P x} {y': P x'} (p: x = x') (q: p # y = y')
+  : ap pr1 (path_sigma' P p q) ≡ p.
+Proof.
+  etransitivity. exact (ap_path_sigma P (λ a _, a) p q).
+Admitted.
+  
+
+
+
+
 
 (* Paths *)
 (* Definition Etransport_paths_l {A : Type} {x1 x2 y : A} (p : x1 ≡ x2) (q : x1 = y) *)
@@ -266,27 +284,16 @@ Proof.
 Defined.
 
 
+Lemma ap_transport_paths `(f: A -> B) {x y1 y2: A} (p: y1 = y2) (q: x = y1)
+  : ap f (transport (λ y : A, x = y) p q) ≡ transport (λ z, f x = z) (ap f p) (ap f q).
+Admitted.
 
-Definition concat_Ep `(e: x ≡ y :> A) `(p: y = z) : x = z
-  := Etransport (λ u, u = z) e^E p.
-
-Definition concat_EVp `(e: y ≡ x :> A) `(p: y = z) : x = z
-  := Etransport (λ u, u = z) e p.
-
-Definition concat_pE `(p: x = y :> A) `(e: y ≡ z) : x = z
-  := Etransport (λ v, x = v) e p.
-
-Definition concat_EpE `(e1: x' ≡ x :> A) `(p: x = y) `(e2: y ≡ y') : x' = y'
-  := concat_pE (concat_Ep e1 p) e2.
-
-Definition concat_EVpE `(e1: x ≡ x' :> A) `(p: x = y) `(e2: y ≡ y') : x' = y'
-  := concat_pE (concat_EVp e1 p) e2.
-
-Lemma concat_EVpE_pp `(e1: x ≡ x' :> A) `(p: x = y) `(q: y = z) `(e2: z ≡ z')
-  : concat_EVpE e1 (p @ q) e2 ≡ (concat_EVp e1 p) @ (concat_pE q e2).
+Lemma transport_Eq_to_paths_l {A} {x y1 y2: A} (e: y1 ≡ y2) (q: x = y1)
+  : transport (λ y : A, x = y) (Eq_to_paths e) q ≡ concat_pE q e.
 Proof.
-    by destruct e1, e2.
+    by destruct e.
 Defined.
+
 
 
 
