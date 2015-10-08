@@ -51,9 +51,9 @@ vo_to_obj = $(addsuffix .o,\
 ##########################
 
 COQLIBS?=\
-  -R "." MyLib
+  -R "." Colimits
 COQDOCLIBS?=\
-  -R "." MyLib
+  -R "." Colimits
 
 ##########################
 #                        #
@@ -96,21 +96,17 @@ endif
 #                    #
 ######################
 
-VFILES:=FibCofib.v\
-  Cylinder_Pushout.v\
-  StrictEq/ETypes.v\
-  StrictEq/EPathGroupoids.v\
-  StrictEq/EOverture.v\
-  Colimits/MappingTelescope.v\
-  Colimits/KernelPair.v\
-  Colimits/Diagram.v\
-  Colimits/CommutativeSquares.v\
-  Colimits/Colimit.v\
-  Colimits/Colimit_Sigma.v\
-  Colimits/Colimit_Prod.v\
-  Colimits/CoEqualizer.v\
-  Colimits/CechNerve.v\
-  Colimits/Auxiliary.v\
+VFILES:=Colimit_trunc.v\
+  MappingTelescope.v\
+  KernelPair.v\
+  Diagram.v\
+  CommutativeSquares.v\
+  Colimit.v\
+  Colimit_Sigma.v\
+  Colimit_Prod.v\
+  CoEqualizer.v\
+  CechNerve.v\
+  Auxiliary.v\
   MyLemmas.v\
   MyTacs.v
 
@@ -195,22 +191,22 @@ userinstall:
 
 install:
 	cd "." && for i in $(VOFILES) $(VFILES) $(GLOBFILES) $(NATIVEFILES) $(CMOFILES) $(CMIFILES) $(CMAFILES); do \
-	 install -d "`dirname "$(DSTROOT)"$(COQLIBINSTALL)/MyLib/$$i`"; \
-	 install -m 0644 $$i "$(DSTROOT)"$(COQLIBINSTALL)/MyLib/$$i; \
+	 install -d "`dirname "$(DSTROOT)"$(COQLIBINSTALL)/Colimits/$$i`"; \
+	 install -m 0644 $$i "$(DSTROOT)"$(COQLIBINSTALL)/Colimits/$$i; \
 	done
 
 install-doc:
-	install -d "$(DSTROOT)"$(COQDOCINSTALL)/MyLib/html
+	install -d "$(DSTROOT)"$(COQDOCINSTALL)/Colimits/html
 	for i in html/*; do \
-	 install -m 0644 $$i "$(DSTROOT)"$(COQDOCINSTALL)/MyLib/$$i;\
+	 install -m 0644 $$i "$(DSTROOT)"$(COQDOCINSTALL)/Colimits/$$i;\
 	done
 
 uninstall_me.sh: Makefile
 	echo '#!/bin/sh' > $@ 
-	printf 'cd "$${DSTROOT}"$(COQLIBINSTALL)/MyLib && rm -f $(VOFILES) $(VFILES) $(GLOBFILES) $(NATIVEFILES) $(CMOFILES) $(CMIFILES) $(CMAFILES) && find . -type d -and -empty -delete\ncd "$${DSTROOT}"$(COQLIBINSTALL) && find "MyLib" -maxdepth 0 -and -empty -exec rmdir -p \{\} \;\n' >> "$@"
-	printf 'cd "$${DSTROOT}"$(COQDOCINSTALL)/MyLib \\\n' >> "$@"
+	printf 'cd "$${DSTROOT}"$(COQLIBINSTALL)/Colimits && rm -f $(VOFILES) $(VFILES) $(GLOBFILES) $(NATIVEFILES) $(CMOFILES) $(CMIFILES) $(CMAFILES) && find . -type d -and -empty -delete\ncd "$${DSTROOT}"$(COQLIBINSTALL) && find "Colimits" -maxdepth 0 -and -empty -exec rmdir -p \{\} \;\n' >> "$@"
+	printf 'cd "$${DSTROOT}"$(COQDOCINSTALL)/Colimits \\\n' >> "$@"
 	printf '&& rm -f $(shell find "html" -maxdepth 1 -and -type f -print)\n' >> "$@"
-	printf 'cd "$${DSTROOT}"$(COQDOCINSTALL) && find MyLib/html -maxdepth 0 -and -empty -exec rmdir -p \{\} \;\n' >> "$@"
+	printf 'cd "$${DSTROOT}"$(COQDOCINSTALL) && find Colimits/html -maxdepth 0 -and -empty -exec rmdir -p \{\} \;\n' >> "$@"
 	chmod +x $@
 
 uninstall: uninstall_me.sh

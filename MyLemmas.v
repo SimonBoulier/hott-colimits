@@ -19,6 +19,10 @@ Lemma ap_apply_truc_2 {A B D: Type} {C: B -> Type} (M: A -> forall b:B, C b -> D
 Defined.
 
 
+Lemma ap_path_sigma_1 {A B: Type} {P: A -> Type} (F: forall a: A, P a -> B) (a: A) {x y: P a} (p: x = y)
+: ap (λ w, F w.1 w.2) (path_sigma' P 1 p) = ap (λ z, F a z) p.
+  destruct p; reflexivity.
+Defined.
 
 Lemma apD_pp `{P: A -> Type} (f: forall a, P a) {x y z: A} (p: x = y) (q: y = z)
 : apD f (p @ q) = (transport_pp P p q (f x)) @ (ap _ (apD f p)) @ (apD f q).
