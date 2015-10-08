@@ -1,7 +1,7 @@
 Require Import HoTT.Basics HoTT.Types.Bool HoTT.Types.Paths.
 Require Import Colimits.Diagram Colimits.Colimit.
 
-Context `{Funext}.
+Local Open Scope path.
   
 Section MappingTelescope.
 
@@ -14,7 +14,7 @@ Section MappingTelescope.
   Definition equiv_mappingtelescope_diag (D1 D2: diagram mappingtelescope_graph)
              (H0: (D1 0) <~> (D2 0))
              (Hn: forall n (e: (D1 n) <~> (D2 n)),
-                   {e' : (D1 n.+1) <~> (D2 n.+1) & (D2 _f idpath) o e == e' o (D1 _f idpath)})
+                   {e' : (D1 n.+1) <~> (D2 n.+1) & (D2 _f 1) o e == e' o (D1 _f 1)})
   : D1 ≃ D2.
     refine (Build_diagram_equiv (Build_diagram_map _ _) _).
     - intros n. apply equiv_fun. induction n. apply H0. exact (Hn n IHn).1.
