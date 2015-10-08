@@ -6,177 +6,167 @@ Generalizable All Variables.
 
 Context `{Funext}.
 
-Section KernelPair.
-  Definition KP_diag `(f: A -> B) : diagram coequalizer_graph.
-    refine (Build_diagram _ _ _).
-    - intro x; destruct x.
-      exact {a:A & {a':A & f a = f a'}}. exact A.
-    - intros i j; destruct i, j; intro H; destruct H. exact pr1. exact (λ w, w.2.1).
+Module Export KP.
+  Private Inductive KP {A B:Type} (f: A -> B) : Type :=
+  | kp : A -> (KP f).
+
+  Axiom kp_eq : forall {A B} {f: A -> B} (a b: A), f a = f b -> kp f a = kp f b.
+
+  Axiom kp_eq2 : forall {A B f} (a: A), @kp_eq A B f a a 1 = 1.
+
+  Arguments kp {A B f} a.
+
+  Definition KP_ind {A B: Type} {f: A -> B} (P: KP f -> Type)
+             (kp': forall a, P (kp a))
+             (kp_eq': forall a b p, transport P (kp_eq a b p) (kp' a) = kp' b)
+             (kp_eq2': forall a, (transport2 P (kp_eq2 a) (kp' a))^ @ kp_eq' a a 1 = 1)
+    : forall w, P w
+    := fun w => match w with
+                |kp a => fun _ => kp' a
+                end kp_eq2'.
+
+  Axiom KP_ind_beta_kp_eq : forall {A B: Type} {f: A -> B} (P: KP f -> Type)
+                                   (kp': forall a, P (kp a))
+                                   (kp_eq': forall a b p, transport P (kp_eq a b p) (kp' a) = kp' b)
+                                   (kp_eq2': forall a, (transport2 P (kp_eq2 a) (kp' a))^ @ kp_eq' a a 1 = 1)
+                                   a b p,
+      apD (KP_ind P kp' kp_eq' kp_eq2') (kp_eq a b p) = kp_eq' a b p.
+
+  Definition KP_rec {A B: Type} {f: A -> B} (P: Type)
+             (kp': A -> P)
+             (kp_eq': forall (a b: A) (p: f a = f b), kp' a = kp' b)
+             (kp_eq2': forall a, kp_eq' a a 1 = 1)
+    : KP f -> P.
+  Proof.
+    refine (KP_ind _ kp' (fun a b p => transport_const _ _ @ kp_eq' a b p)  _).
+    intro a.
+    exact ((concat_p_pp (p:= (transport2 (λ _ : KP f, P) (kp_eq2 a) (kp' a))^)
+                        (q:= transport_const (kp_eq a a 1) (kp' a)) (r:= kp_eq' a a 1))
+             @ whiskerR (moveR_Vp _ _ _ (transport2_const (A:=KP f) (B:= P) (kp_eq2 a) (kp' a))) (kp_eq' a a 1)
+             @ concat_1p _
+             @ (kp_eq2' a)).
   Defined.
 
-  Definition KP_cocone `{f: A -> B} `(q: A -> Q) (Hq: forall x y, f x = f y -> q x = q y)
-  : cocone (KP_diag f) Q.
-  refine (Build_cocone _ _).
-  - intros i x; destruct i; simpl in *. exact (q x.1). exact (q x).
-  - intros i j g x; destruct i, j, g; simpl in *. reflexivity.
-    refine (Hq _ _ _). exact x.2.2^.
+  Definition KP_rec_beta_kp_eq {A B: Type} {f: A -> B} (P: Type)
+             (kp': A -> P)
+             (kp_eq': forall (a b: A) (p: f a = f b), kp' a = kp' b)
+             (kp_eq2': forall a, kp_eq' a a 1 = 1)
+             a b p
+    : ap (KP_rec P kp' kp_eq' kp_eq2') (kp_eq a b p) = kp_eq' a b p.
+  Proof.
+  Admitted.
+
+  Definition KP_eta `{f: A -> B} {Z} (F G: KP f -> Z)
+             (H1: F o kp == G o kp)
+             (H2: forall x y p, ap F (kp_eq x y p) @ H1 y = H1 x @ ap G (kp_eq x y p))
+             (H3: forall x, H2 x x 1
+                            = transport (λ p, ap F p @ H1 x = H1 x @ ap G p) (kp_eq2 x)^
+                              (concat_1p (H1 x) @ (concat_p1 (H1 x))^) )
+    : F == G.
+  Proof.
+    refine (KP_ind _ _ _ _).
+    - exact H1.
+    - intros x y p. etransitivity.
+      rapply @transport_paths_FlFr.
+      refine (concat_pp_p @ _).
+      apply moveR_Vp. by symmetry.
+    - admit.
   Defined.
 
-  Definition KP `(f: A -> B) := colimit (KP_diag f).
-
-  Definition KP_colimit `(f: A -> B) : is_colimit (KP_diag f) (KP f)
-    := is_colimit_colimit _.
-
-  Definition kp `{f: A -> B} : A -> KP f :=
-    @colim _ (KP_diag f) false.
-
-  Definition kp_eq `{f: A -> B} : forall (a a': A), f a = f a' -> @kp _ _ f a = kp a'.
-    intros a a' p.
-    etransitivity. exact (@pp _ (KP_diag f) true false true (a; (a'; p))).
-    exact (@pp _ (KP_diag f) true false false (a; (a'; p)))^.
+  Lemma transport_KP `{f: forall (z: Z), A z -> B z} `(p: z1 = z2 :> Z) (x: A z1)
+    : transport (λ z, KP (f z)) p (kp x) = kp (p # x).
+      by destruct p.
   Defined.
-End KernelPair.
+End KP.
+
 
 Section T.
-  Definition T_diag (X: Type) : diagram coequalizer_graph.
-    refine (Build_diagram _ _ _).
-    - intro x; destruct x.
-      exact (X * X). exact X.
-    - intros i j g; destruct i, j, g. exact fst. exact snd.
-  Defined.
+  Definition T (X: Type) := KP (λ x: X, tt).
 
-  Definition T_diag_equiv `(e: X <~> Y) : (T_diag X) ≃ (T_diag Y).
-    refine (Build_diagram_equiv (Build_diagram_map _ _) _).
-    - intros i; destruct i; simpl. exact (functor_prod e e). exact e.
-    - intros i j g; destruct i, j, g; reflexivity.
-    - intros i; destruct i; simpl. apply isequiv_functor_prod. apply e.
-  Defined.
+  Definition α {X} : X -> T X := kp.
   
-  Definition T_cocone {X: Type} `(f: X -> Y) (Hf: forall x y, f x = f y)
-  : cocone (T_diag X) Y.
-    refine (Build_cocone _ _).
-    - intros i x; destruct i; simpl in *. exact (f (fst x)). exact (f x).
-    - intros i j g x; destruct i, j, g; simpl in *. reflexivity. apply Hf.
+  Definition β {X} : forall x y: X, α x = α y
+    := λ x y, kp_eq (f:=(λ x: X, tt)) x y 1.
+
+  Definition Ɣ {X} : forall x: X, β x x = 1
+    := λ x, kp_eq2 x.
+  
+  Definition functoriality_T `(f: X -> Y) : T X -> T Y.
+  Proof.
+    refine (KP_rec _ (α o f) _ _).
+    - intros a b p; apply β.
+    - intros a; apply Ɣ.
   Defined.
 
-  Definition T_diag_KP_diag {X: Type} : T_diag X ≃ (KP_diag (λ _:X, tt)).
-    refine (Build_diagram_equiv _ _).
-    - refine (Build_diagram_map _ _).
-      + intros i x; destruct i; simpl in *. exact (fst x; (snd x; 1)). exact x.
-      + intros i j g x; destruct i, j, g; reflexivity.
-    - intros i; destruct i; simpl.
-      + refine (isequiv_adjointify (λ x, (x.1, x.2.1)) _ _); intro; simpl.
-        2:reflexivity. refine (path_sigma' _ 1 (path_sigma' _ 1 _)).
-        simpl. apply path_ishprop.
-      + apply isequiv_idmap.
+  Definition functoriality_equiv_T `(f: X <~> Y) : T X <~> T Y.
+  Proof.
+    refine (equiv_adjointify (functoriality_T f) (functoriality_T f^-1) _ _).
+    - refine (KP_eta _ idmap _ _ _).
+      + intro; simpl. apply ap, eisretr.
+      + intros x y p; simpl.
+        rewrite ap_idmap, ap_compose.
+        unfold functoriality_T at 4.
+        rewrite KP_rec_beta_kp_eq.
+        etransitivity. refine (ap011 concat _ 1).
+        2: rapply @KP_rec_beta_kp_eq.
+        admit.
+      + admit.
+    - refine (KP_eta _ idmap _ _ _).
+      + intro; simpl. apply ap, eissect.
+      + admit.
+      + admit.
   Defined.
-
-  Definition T (X: Type) := colimit (T_diag X).
-
-  Definition T_colimit (X: Type) : is_colimit (T_diag X) (T X)
-    := is_colimit_colimit _.
-
-  Definition α {X: Type} : X -> T X :=
-    @colim _ (T_diag X) false.
-    
-  Definition β {X: Type} : forall x y: X, α x = α y
-      := λ x y, (@pp _ (T_diag X) true false true (x,y))
-                  @ (@pp _ (T_diag X) true false false (x,y))^.
-
-  Definition T_functor_equiv `(e: X <~> Y) : (T X) <~> (T Y)
-    := functoriality_colimit_equiv (T_diag_equiv e) (T_colimit _) (T_colimit _).
 End T.
 
 
 Section KP_Sigma.
-  Context {X Y: Type} (f: X -> Y).
+  Context `(f: A -> B).
 
-  Definition diagram_map_fib_fib_diag : diagram_map (KP_diag f) (sigma_diag (λ y, T_diag (hfiber f y))).
-    refine (Build_diagram_map _ _).
-    - intros i x; destruct i; simpl in *.
-      exists (f x.1). exact ((x.1; 1), (x.2.1; x.2.2^)).
-      exact (f x; (x; 1)).
-    - intros i j g x; destruct i, j, g; simpl in *. reflexivity.
-      refine (path_sig_hfiber _ _ _). reflexivity.
-  Defined.
-
-  Definition diagram_equiv_fib_fib_diag :  diagram_equiv (KP_diag f) (sigma_diag (λ y, T_diag (hfiber f y))).
-    refine (Build_diagram_equiv diagram_map_fib_fib_diag _).
-    intros i; destruct i; simpl.
-    - refine (isequiv_adjointify _ _ _).
-      + intros w. exists (fst w.2).1. exists (snd w.2).1.
-        exact ((fst w.2).2 @ (snd w.2).2^).
-      + intros [y [[x e] [x' e']]]; simpl.
-        destruct e. hott_simpl.
-      + intros x; simpl. hott_simpl.
-    - refine (isequiv_adjointify _ _ _).
-      + intros w; exact w.2.1.
-      + intros [y [x e]]; simpl. by destruct e.
-      + intros x. reflexivity.
-  Defined.
-
-
-  Context `(HQ1: is_colimit (KP_diag f) Q1) {Q2: Y -> Type}
-          (HQ2: forall y:Y, is_colimit (T_diag (hfiber f y)) (Q2 y)).
-   
-  Definition KP_slicing : Q1 <~> sig Q2.
-    refine (functoriality_colimit_equiv diagram_equiv_fib_fib_diag HQ1 _).
-    apply is_colimit_sigma. assumption.
+  Lemma KP_slicing : KP f <~> {y: B & T (hfiber f y)}.
+  Proof.
+    transparent assert (F: ((∃ y : B, T (hfiber f y)) → KP f)). {
+      intros [y z].
+      refine (KP_rec _ _ _ _ z).
+      + exact (kp o pr1).
+      + intros a b p. apply kp_eq.
+        etransitivity. apply a.2. apply b.2^.
+      + intros a; cbn. etransitivity.
+        2: exact (kp_eq2 a.1).
+        apply ap. apply concat_pV. }
+    transparent assert (G: (KP f → (∃ y : B, T (hfiber f y)))). {
+      refine (KP_rec _ _ _ _).
+      - intro a. exact (f a ; (kp (a; 1))).
+      - intros a b p; cbn.
+        refine (path_sigma' _ p _).
+        etransitivity. refine (transport_KP _ _).
+          by apply kp_eq.
+      - intros a; cbn. exact (ap _ (ap _ (kp_eq2 _))). }
+    refine (equiv_adjointify G F _ _).
+    - intros [y z]; cbn. admit.
+    - admit.
   Defined.
   
-  Definition KP_lift : Q1 -> Y.
-    refine (postcompose_cocone_inv HQ1 _).
-    refine (KP_cocone f (λ x y e, e)).
-  Defined.
-
-  Definition KP_cocone_lift_ok : KP_cocone f (λ x y e, e) = postcompose_cocone (precompose_cocone diagram_map_fib_fib_diag (sigma_cocone _ HQ2)) pr1.
-    refine (path_cocone _ _).
-    - intros i x; destruct i; reflexivity.
-    - intros i j g x; destruct i, j, g; simpl in *; hott_simpl; unfold path_sigma'.
-      + match goal with
-          | |- ?ee = ap pr1 (path_sigma ?PP ?uu ?vv ?pp ?qq) =>
-                       exact (@pr1_path_sigma _ PP uu vv pp qq)^
-        end.
-      + rewrite ap_pp.
-        match goal with
-          | |- ?ee = ?ee2 @ ap pr1 (path_sigma ?PP ?uu ?vv ?pp ?qq) =>
-                       change (ee = ee2 @ (path_sigma PP uu vv pp qq)..1);
-                       rewrite (@pr1_path_sigma _ PP uu vv pp qq)
-        end.
-        rewrite concat_p1.
-        symmetry; etransitivity.
-        exact (ap_compose _ _ _)^. simpl. unfold path_sig_hfiber.
-        rewrite ap_V. unfold path_sigma'.
-        match goal with
-          | |- (ap _ (path_sigma ?PP ?uu ?vv ?pp ?qq))^ = ?ee =>
-                       change (((path_sigma PP uu vv pp qq)..1)^ = ee);
-                       rewrite (@pr1_path_sigma _ PP uu vv pp qq)
-        end. hott_simpl.
+  Definition KP_lift : KP f -> B.
+  Proof.
+    refine (KP_rec _ f _ _); intros; try reflexivity.
   Defined.
   
-  (* Definition KP_slicing_map : Q1 -> sig Q2. *)
-  (*   refine (postcompose_cocone_inv HQ1 _). *)
-  (*   refine (precompose_cocone diagram_map_fib_fib_diag _). *)
-  (*   refine (sigma_cocone _ _). *)
-  (*   intros y; apply HQ2. *)
-  (* Defined. *)
-
-  (* Definition KP_slicing_map_ok : KP_slicing_map = KP_slicing. *)
-  (*   reflexivity. *)
-  (* Defined. *)
-    
-  Definition KP_lift_slicing : KP_lift = pr1 o KP_slicing.
-    refine (equiv_inj (postcompose_cocone HQ1) _). apply HQ1.
-    unfold KP_lift, postcompose_cocone_inv. rewrite eisretr.
-    rewrite KP_cocone_lift_ok. etransitivity. 2:refine (postcompose_cocone_comp _ _ _)^.
-    apply ap10.
-    (* Set Printing Implicit. *)
-    refine (apD10 _ Y). apply ap.
-    cbn. unfold functoriality_colimit. unfold postcompose_cocone_inv; rewrite eisretr.
-    reflexivity.
+  Definition KP_lift_slicing : KP_lift == pr1 o KP_slicing.
+  Proof.
+    rapply @KP_eta.
+    - intro; reflexivity.
+    - intros x y p. cbn beta.
+      refine (concat_p1 _ @ _ @ (concat_1p _)^).
+      refine (KP_rec_beta_kp_eq _ _ _ _ _ _ _ @ _).
+      refine (_ @ (ap_compose KP_slicing pr1 (kp_eq _ _ p))^).
+      refine (_ @ (ap (ap pr1) _)).
+      3: exact (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^.
+      exact (pr1_path_sigma _ _)^.
+    - intro. cbn beta. admit.
   Defined.
   
-  Definition KP_lift_hfiber (y: Y) : hfiber KP_lift y <~> Q2 y.
+  Definition KP_lift_hfiber (y: B) : hfiber KP_lift y <~> T (hfiber f y).
+  Proof.
     etransitivity. refine (equiv_functor_sigma' KP_slicing _).
     exact (λ x, KP_lift (KP_slicing^-1 x) = y).
     intros a. refine (equiv_paths _). f_ap.
@@ -184,7 +174,7 @@ Section KP_Sigma.
     etransitivity. refine (equiv_functor_sigma_id _).
     exact (λ x, x.1 = y).
     intros w. refine (equiv_paths _).
-    etransitivity. exact (ap10 KP_lift_slicing _).
+    etransitivity. exact (KP_lift_slicing _).
     apply ap. apply eisretr.
     { refine (equiv_adjointify _ _ _ _).
       - intros w. refine (w.2 # w.1.2).
@@ -194,19 +184,20 @@ Section KP_Sigma.
   Defined.
 End KP_Sigma.
 
+
 Section KP_lift_equiv.
   Definition hfiber_KP_lift_equiv `(f: X -> Y) {A: Type} (y: Y) (e: (hfiber f y) <~>  A)
-    : {e': hfiber (KP_lift f (KP_colimit f)) y <~> T A & α o e == e' o (λ x: hfiber f y, (kp x.1; x.2))}.
+  : {e': hfiber (KP_lift f) y <~> T A & α o e == e' o (λ x: hfiber f y, (kp x.1; x.2))}.
+  Proof.
     refine (exist _ _ _).
     - etransitivity.
-      refine (KP_lift_hfiber (Q2 := λ y, T (hfiber f y)) _ _ _ _).
-      intros; apply T_colimit.
-      refine (functoriality_colimit_equiv _ (T_colimit _) (T_colimit _)).
-      refine (T_diag_equiv _). exact e.
+      rapply @KP_lift_hfiber.
+      exact (functoriality_equiv_T e).
     - intros [x p].
-      pose (Te := functoriality_colimit (T_diag_equiv e) (T_colimit _) (T_colimit _)).
-      transitivity (Te (α (x; p))). symmetry.
-      refine (functoriality_colimit_commute (T_diag_equiv e) _ _ false (x; p))^.
+      pose (Te := functoriality_T e).
+      match goal with
+      | |- _ = ?AA => change (Te (α (x; p)) = AA)
+      end.
       match goal with
       | |- ?AA = _ (transitive_equiv _ _ _ ?ee1 ?ee4) ?xx =>
         change (AA = ee4 (ee1 (kp x; p))); set (e4 := equiv_fun ee4)
@@ -217,9 +208,10 @@ Section KP_lift_equiv.
       end. 
       match goal with
       | |- ?AA = e4 (_ (transitive_equiv _ _ _ ?ee2 ?ee3) ?xx) =>
-        change (AA = e4 (ee3 (ee2 xx))); set (e2 := equiv_fun ee2); set (e3 := equiv_fun ee3)
+        change (AA = e4 (ee3 (ee2 xx))); set (e2 := equiv_fun ee2);
+        set (e3 := equiv_fun ee3)
       end.
-      set (sl := equiv_fun (KP_slicing f (KP_colimit f) (λ y0 : Y, T_colimit (hfiber f y0)))) in *.
+      set (sl := equiv_fun (KP_slicing f)) in *.
       symmetry. etransitivity (e4 (e3 (e2 (sl (kp x); _)))). f_ap.
       subst e1.
       etransitivity (e4 (e3 (sl (kp x); _))). f_ap.
@@ -227,11 +219,12 @@ Section KP_lift_equiv.
       match goal with
       | |- e4 (e3 (_; ?ppp)) = _ => set (pp := ppp)
       end.
-      etransitivity (e4 (transport (λ y0 : Y, T (hfiber f y0)) pp (sl (kp x)).2)). reflexivity.
+      etransitivity (e4 (transport (λ y0 : Y, T (hfiber f y0)) pp (sl (kp x)).2)).
+      reflexivity.
       clear e3. f_ap. clear e4.
       change (transport (λ y, T (hfiber f y)) pp (α (x; 1)) = α (x;p)).
       etransitivity.
-      refine (transport_colimit _ (λ y, T_colimit (hfiber f y)) pp false (x; 1)).
+      rapply @transport_KP.
       apply β.
   Defined.
 End KP_lift_equiv.

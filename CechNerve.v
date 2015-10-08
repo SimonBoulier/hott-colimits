@@ -14,7 +14,7 @@ Section CechNerve.
   Definition CechNerve_aux (n: nat) : {T: Type & T -> Y}.
     induction n.
     - exists X. exact f.
-    - exists (KP IHn.2). refine (KP_lift _ (KP_colimit _)).
+    - exists (KP IHn.2). apply KP_lift.
   Defined.
 
   Let fn := λ n, (CechNerve_aux n).2. 
