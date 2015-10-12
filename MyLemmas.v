@@ -2,10 +2,6 @@ Require Import HoTT.Basics HoTT.Types HoTT.Fibrations.
 Require Import MyTacs.
 Generalizable All Variables.
 
-Global Arguments idpath {A} a.
-
-Definition π1 {A} P := @pr1 A P.
-
 
 
 Lemma ap_apply_truc {A B: Type} {P: A -> Type} {f g: forall a: A, P a -> B} (p: f = g) (a: A) (x: P a)

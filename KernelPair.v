@@ -122,29 +122,22 @@ End T.
 Section KP_Sigma.
   Context `(f: A -> B).
 
-  Lemma KP_slicing : KP f <~> {y: B & T (hfiber f y)}.
+  Lemma KP_slicing_fun : KP f -> {y: B & T (hfiber f y)}.
   Proof.
-    transparent assert (F: ((∃ y : B, T (hfiber f y)) → KP f)). {
-      intros [y z].
-      refine (KP_rec _ _ _ _ z).
-      + exact (kp o pr1).
-      + intros a b p. apply kp_eq.
-        etransitivity. apply a.2. apply b.2^.
-      + intros a; cbn. etransitivity.
-        2: exact (kp_eq2 a.1).
-        apply ap. apply concat_pV. }
-    transparent assert (G: (KP f → (∃ y : B, T (hfiber f y)))). {
-      refine (KP_rec _ _ _ _).
-      - intro a. exact (f a ; (kp (a; 1))).
-      - intros a b p; cbn.
-        refine (path_sigma' _ p _).
-        etransitivity. refine (transport_KP _ _).
-          by apply kp_eq.
-      - intros a; cbn. exact (ap _ (ap _ (kp_eq2 _))). }
-    refine (equiv_adjointify G F _ _).
-    - intros [y z]; cbn. admit.
-    - admit.
+    refine (KP_rec _ _ _ _).
+    - intro a. exact (f a ; (kp (a; 1))).
+    - intros a b p; cbn.
+      refine (path_sigma' _ p _).
+      etransitivity. refine (transport_KP _ _).
+        by apply kp_eq.
+    - intros a; cbn. exact (ap _ (ap _ (kp_eq2 _))).
   Defined.
+
+  Lemma KP_slicing_isequiv : IsEquiv KP_slicing_fun.
+  Admitted.
+  
+  Definition KP_slicing : KP f <~> {y: B & T (hfiber f y)}
+    := BuildEquiv KP_slicing_isequiv.
   
   Definition KP_lift : KP f -> B.
   Proof.
