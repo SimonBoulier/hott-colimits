@@ -49,13 +49,13 @@ Section CechNerve.
     - intros i j q; destruct q; simpl. apply α.
   Defined.
 
-  Definition SlicedCechNerve_equiv2 (y: Y) : (SlicedCechNerve1 y) ≃ (SlicedCechNerve2 y).
+  Definition SlicedCechNerve_equiv2 `{ua : Univalence} (y: Y) : (SlicedCechNerve1 y) ≃ (SlicedCechNerve2 y).
     refine (equiv_mappingtelescope_diag _ _ _ _); simpl.
     apply reflexive_equiv.
     intros n e. refine (hfiber_KP_lift_equiv _ _ _).
   Defined.
 
-  Definition SlicedCechNerve_equiv : CechNerve ≃ (sigma_diag SlicedCechNerve2).
+  Definition SlicedCechNerve_equiv `{ua : Univalence} : CechNerve ≃ (sigma_diag SlicedCechNerve2).
     etransitivity. apply SlicedCechNerve_equiv1.
     refine (sigma_diag_functor_equiv _ _ _).
     apply SlicedCechNerve_equiv2.
