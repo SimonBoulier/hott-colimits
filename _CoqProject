@@ -1,5 +1,4 @@
-COQC = ../HoTT/hoqc
-COQDEP = ../HoTT/hoqdep
+COQC = hoqc
 -R . Colimits
 
 MyTacs.v
