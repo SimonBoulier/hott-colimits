@@ -92,4 +92,54 @@ Lemma ap_ap2_path_forall `{HF:Funext} (X:Type) (Y : X -> Type) (Z:forall x:X, Y 
   pose (rew := ap_ap_path_forall (λ x0 : X, path_forall (g x0) (h x0) (eq x0))); simpl in rew. rewrite rew; clear rew.
   apply ap_ap_path_forall.
 Qed.
+
+Lemma concat_ap_Fpq (A B:Type) (a b:A) (c d e:B) (f: a = b -> c = d)
+      (v:d = e)
+      (u1 u2:a=b) (p:u1 = u2)
+  : ap (fun u:a=b => f u @ v) p = whiskerR (ap f p) v.
+Proof.
+  destruct p; reflexivity.
+Defined.
+
+Lemma concat_ap_pFq (A B:Type) (a b:A) (d e c:B) (f: a = b -> e = c)
+      (v:d = e)
+      (u1 u2:a=b) (p:u1 = u2)
+  : ap (fun u:a=b => v @ f u) p = whiskerL v (ap f p).
+Proof.
+  destruct p; reflexivity.
+Defined.
+
+Lemma whiskerL_LV (A : Type) (x y z: A) (p : x = y) (q q' : y = z) 
+      (r : q = q')
+  : whiskerL p r^ = (whiskerL p r)^.
+Proof.
+  destruct r, q, p; reflexivity.
+Qed.
+
+Lemma whiskerR_RV (A : Type) (x y z: A) (p : y = z) (q q' : x = y) 
+      (r : q = q')
+  : whiskerR r^ p = (whiskerR r p)^.
+Proof.
+  destruct r, q, p; reflexivity.
+Defined.
+
+Lemma ap02_is_ap (A B : Type) (f : A -> B) (x y : A) (p q : x = y) (r:p=q)
+  : ap02 f r = ap (ap f) r.
+Proof.
+  destruct r; reflexivity.
+Defined.
+
+Lemma ap02_compose (A B C : Type) (f : A -> B) (g : B -> C) (x y : A) (p p': x = y) (q:p=p')
+  : ap02 (g o f) q = ap_compose f g p @ (ap02 g (ap02 f q) @ (ap_compose f g p')^).
+Proof.
+  destruct q, p; reflexivity.
+Defined.
+
+Lemma ap02_V (A B : Type) (f : A -> B) (x y : A) (p q : x = y) (r:p=q)
+  : ap02 f r^ = (ap02 f r)^.
+Proof.
+  destruct r; reflexivity.
+Defined.
+
+
 Unset Implicit Arguments.
