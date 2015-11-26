@@ -5,13 +5,14 @@ MyTacs.v
 MyLemmas.v
 
 Auxiliary.v
-CechNerve.v
 CoEqualizer.v
 Colimit_Prod.v
 Colimit_Sigma.v
 Colimit.v
 CommutativeSquares.v
 Diagram.v
-KernelPair.v
-MappingTelescope.v
 Colimit_trunc.v
+
+CechNerve/MappingTelescope.v
+CechNerve/KernelPair.v
+CechNerve/CechNerve.v
