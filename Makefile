@@ -97,7 +97,8 @@ endif
 ######################
 
 VFILES:=CechNerve/CechNerve.v\
-  CechNerve/KernelPair.v\
+  CechNerve/KernelPair_v2.v\
+  CechNerve/KernelPair_v1.v\
   CechNerve/MappingTelescope.v\
   Colimit_trunc.v\
   Diagram.v\

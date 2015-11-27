@@ -14,5 +14,6 @@ Diagram.v
 Colimit_trunc.v
 
 CechNerve/MappingTelescope.v
-CechNerve/KernelPair.v
+CechNerve/KernelPair_v1.v
+CechNerve/KernelPair_v2.v
 CechNerve/CechNerve.v

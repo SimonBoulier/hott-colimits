@@ -1,5 +1,9 @@
 Require Import HoTT.Basics HoTT.Types HoTT.Fibrations.
-Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.Colimit_Sigma Colimits.CechNerve.MappingTelescope Colimits.CechNerve.KernelPair.
+Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.Colimit_Sigma Colimits.CechNerve.MappingTelescope.
+
+Require Import Colimits.CechNerve.KernelPair_v2.
+(* can be changed to KernelPair_v2. *)
+
 
 Local Open Scope path_scope.
 Generalizable All Variables. 
@@ -14,7 +18,8 @@ Section CechNerve.
   Definition CechNerve_aux (n: nat) : {T: Type & T -> Y}.
     induction n.
     - exists X. exact f.
-    - exists (KP IHn.2). apply KP_lift.
+    - exists (KP IHn.2).
+      first [apply KP_lift | refine (KP_lift _ (KP_colimit _))].
   Defined.
 
   Let fn := λ n, (CechNerve_aux n).2. 
