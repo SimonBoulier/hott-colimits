@@ -101,6 +101,7 @@ VFILES:=FibCofib.v\
   StrictEq/EPathGroupoids.v\
   StrictEq/EOverture.v\
   Colimits/MappingTelescope.v\
+  Colimits/KernelPair_v2.v\
   Colimits/KernelPair.v\
   Colimits/Diagram.v\
   Colimits/CommutativeSquares.v\

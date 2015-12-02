@@ -13,6 +13,7 @@ Colimits/Colimit.v
 Colimits/CommutativeSquares.v
 Colimits/Diagram.v
 Colimits/KernelPair.v
+Colimits/KernelPair_v2.v
 Colimits/MappingTelescope.v
 
 StrictEq/EOverture.v

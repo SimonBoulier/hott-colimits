@@ -157,19 +157,25 @@ Module Export colimit_HIT.
       {G: graph} {D: diagram G} (P: colimit D -> Type) p' pp' ppp' (i j: G) (g: G i j) (x: D i),
       apD (colimit_ind P p' pp' ppp') (pp i j g x) = pp' i j g x.
 
+  Definition colimit_rec0 {G: graph} {D: diagram G} (P: Type)
+             (p'  : forall i, D i -> P)
+             (pp' : forall i j (g: G i j) x, p' j (D _f g x) = p' i x)
+             (ppp': forall i j a b (p: graph2 G i j a b) x,
+                 pp' j i b (D _f a x) @  pp' i j a x = ap (p' i) (diagram2 D p x))           
+    : colimit D -> P
+    := fun w => match w with colim i a => fun _ _ => p' _ a end pp' ppp'.
   
   Definition colimit_rec {G: graph} {D: diagram G} (P: Type) (C: cocone D P)
     : colimit D -> P.
   Proof.
-    refine (colimit_ind _ _ _ _).
+    refine (colimit_rec0 _ _ _ _).
     - exact C.
-    - intros i j g x.
-      exact ((transport_const (pp i j g x) (q _ _ (D _f g x))) @ (qq _ i j g x)).
-    - intros i j a b a' b' p x. cbn.
-      Open Scope long_path_scope.
-      symmetry; etransitivity. apply apD_const.
-      rewrite <- qqq. rewrite <- !concat_pp_p.
-      refine (ap011 concat _ 1). admit.
+    - exact (qq C).
+    - exact (qqq C).
+      (* intros i j a b a' b' p x. cbn. *)
+      (* symmetry; etransitivity. apply apD_const. *)
+      (* rewrite <- qqq. rewrite <- !concat_pp_p. *)
+      (* refine (ap011 concat _ 1). admit. *)
   Defined.
   
   Definition colimit_rec_beta_pp {G: graph} {D: diagram G} (P: Type) (C: cocone D P)
@@ -188,17 +194,19 @@ Module Export colimit_HIT.
   : is_universal (cocone_colimit D).
     intro Y; simpl.
     refine (isequiv_adjointify (colimit_rec Y) _ _).
-    (* - intros C. refine (path_cocone _ _). *)
-    (*   intros i x. reflexivity. *)
-    (*   intros i j f x. simpl. hott_simpl. *)
-    (*   apply colimit_rec_beta_pp. *)
-    (* - intro f. apply path_forall. *)
-    (*   refine (colimit_ind  _ _ _). *)
-    (*   intros i x. reflexivity. *)
-    (*   intros i j g x. simpl. *)
-    (*   rewrite transport_paths_FlFr. *)
-    (*   rewrite colimit_rec_beta_pp. hott_simpl. *)
-    admit. admit.
+    - intros C. admit.
+      (* refine (path_cocone _ _). *)
+      (* intros i x. reflexivity. *)
+      (* intros i j f x. simpl. hott_simpl. *)
+      (* apply colimit_rec_beta_pp. *)
+    - intro f. apply path_forall.
+      refine (colimit_ind _  _ _ _).
+      intros i x. reflexivity.
+      intros i j g x. simpl.
+      rewrite transport_paths_FlFr.
+      rewrite colimit_rec_beta_pp. cbn. hott_simpl.
+      rewrite ap_V. rapply @concat_Vp.
+      admit.
   Defined.
 
   Definition is_colimit_colimit {G: graph} (D: diagram G) : is_colimit D (colimit D)
