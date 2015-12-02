@@ -61,7 +61,9 @@ COQDOCLIBS?=\
 #                        #
 ##########################
 
-COQC=hoqc
+COQTOP=../HoTT/hoqtop
+COQDEP=../HoTT/hoqdep
+COQC=../HoTT/hoqc
 
 OPT?=
 COQDEP?="$(COQBIN)coqdep" -c
@@ -97,6 +99,7 @@ endif
 ######################
 
 VFILES:=CechNerve/CechNerve.v\
+  CechNerve/KP_v2_mono.v\
   CechNerve/KernelPair_v2.v\
   CechNerve/KernelPair_v1.v\
   CechNerve/MappingTelescope.v\

@@ -141,5 +141,26 @@ Proof.
   destruct r; reflexivity.
 Defined.
 
+Lemma transport2_is_ap  (A : Type) (Q : A -> Type) (x y : A) (p q : x = y) 
+      (r : p = q) (z : Q x)
+  : transport2 Q r z = ap (fun U => transport Q U z) r.
+Proof.
+  destruct r. reflexivity.
+Defined.
+
+Lemma ap_FG {A B:Type} {a b:A} {d e f:B} (F: a = b -> e = f) (G: a = b -> f = d)
+      {u v:a = b} (p: u = v)
+  : ap (λ x, F x @ G x) p = ap F p @@ ap G p.
+Proof.
+  destruct p.
+  reflexivity.
+Defined.
+
+Lemma concat2_inv (A : Type) (x y z : A) (p p' : x = y) (q q' : y = z)
+      (r:p=p') (s:q=q')
+  : (r @@ s)^ = (r^ @@ s^).
+Proof.
+  destruct r, s. reflexivity.
+Defined.
 
 Unset Implicit Arguments.

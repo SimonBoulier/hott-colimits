@@ -1,4 +1,7 @@
-COQC = hoqc
+COQC = ../HoTT/hoqc
+COQDEP = ../HoTT/hoqdep
+COQTOP = ../HoTT/hoqtop
+
 -R . Colimits
 
 MyTacs.v
@@ -16,4 +19,5 @@ Colimit_trunc.v
 CechNerve/MappingTelescope.v
 CechNerve/KernelPair_v1.v
 CechNerve/KernelPair_v2.v
+CechNerve/KP_v2_mono.v
 CechNerve/CechNerve.v
