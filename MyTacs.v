@@ -9,6 +9,15 @@ Tactic Notation "sym" simple_intropattern(H) := symmetry; apply H.
 Global Open Scope path_scope.
 
 
+Ltac set_path :=
+  match goal with
+  | |- ?A @ ?B = ?C @ ?D => set A; set B; set C; set D
+  | |- ?A @ ?B = ?C => set A; set B; set C
+  | |- ?A = ?B @ ?C => set A; set B; set C
+  | |- ?A = ?B => set A; set B
+  end.
+
+
   (** We define a tactic [funext], working as: *)
   (** - if one calls [funext] with no arguments, then [funext] applies [path_forall] as much as possible, and introduces fresh names (the ones that would be introduced by [intros.] *)
   (** - if one calls [funext] with i arguments, 1 ≤ i ≤ 6, then [funext] applies i times [path_forall] and introduces the name given in arguments*)
