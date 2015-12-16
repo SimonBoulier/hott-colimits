@@ -35,7 +35,7 @@ Section Cocone.
   : C1 = C2.
     destruct C1 as [q pp_q], C2 as [r pp_r].
     refine (path_cocone_naive (path_forall (λ i, path_forall (eq1 i))) _). simpl.
-    funext4 i j f x.
+    funext i j f x.
     repeat rewrite transport_forall_constant.
     rewrite transport_paths_FlFr.
     rewrite concat_pp_p. apply moveR_Vp.

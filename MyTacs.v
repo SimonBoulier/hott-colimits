@@ -48,16 +48,16 @@ Ltac set_path :=
   Tactic Notation "funext" simple_intropattern(a) simple_intropattern(b) simple_intropattern(c) simple_intropattern(d) simple_intropattern(e) simple_intropattern(f)
     := funext6 a b c d e f.
 
-  (* If too much arguments, [funext] uses the following, which applies path_forall as many times as possible. *)
-  Ltac funext' :=
-    match goal with
-      |[|- ?f = ?g] =>
-       match type of f with
-         |forall x:_, _ => let x := fresh x in
-                           apply path_forall; intro x; funext'; revert x
-       end
-      |_ => idtac
-    end.
+  (* (* If too much arguments, [funext] uses the following, which applies path_forall as many times as possible. *) *)
+  (* Ltac funext' := *)
+  (*   match goal with *)
+  (*     |[|- ?f = ?g] => *)
+  (*      match type of f with *)
+  (*        |forall x:_, _ => let x := fresh x in *)
+  (*                          apply path_forall; intro x; funext'; revert x *)
+  (*      end *)
+  (*     |_ => idtac *)
+  (*   end. *)
 
-  Tactic Notation (at level 2) "funext" simple_intropattern_list(a) := funext'; intros a.
+  (* Tactic Notation (at level 2) "funext" simple_intropattern_list(a) := funext'; intros a. *)
   
