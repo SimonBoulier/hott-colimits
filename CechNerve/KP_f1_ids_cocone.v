@@ -1,5 +1,5 @@
-Require Import HoTT.Basics HoTT.Types HoTT.Fibrations.
-Require Import MyTacs MyLemmas. (*Colimits.Diagram Colimits.Colimit Colimits.Colimit_Sigma Colimits.CechNerve.MappingTelescope Colimits.CechNerve.KernelPair.  *)
+Require Import HoTT.
+Require Import MyTacs MyLemmas.
 Require Import Colimits.CechNerve.KernelPair_v2.
 
 Local Open Scope path_scope.
@@ -128,17 +128,12 @@ Module Cocone.
   Abort.
 
 
-  
-  
-  Require Import HoTT.
-
   Definition Im := ∃ (y: B), Trunc (-1) (∃ x, f x = y).
 
   Let im : A -> Im := (λ x, (f x; tr (x; 1))).
-
   
   Lemma im_cocone : cech3_cocone Im.
-    refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
+    refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
     exact im.
     exact (im o π2).
     exact (im o g3).
@@ -151,10 +146,15 @@ Module Cocone.
       apply ap. apply path_ishprop.
     - cbn. refine (concat_1p _ @ _ @ (concat_p1 _)^).
       reflexivity.
+    - cbn. refine (concat_p1 _ @ _).
+      change (path_sigma' (λ y : B, Trunc (-1) (∃ x0 : A, f x0 = y)) 1
+                          (path_ishprop (tr (x; 1)) (tr (x; 1))) = path_sigma' _ 1 1).
+      apply ap, path_ishprop.
   Defined.
-
   End Po.
-  End Cocone.
+End Cocone.
+
+
 
 Module Cocone2.
   Section Po.
@@ -205,53 +205,6 @@ Module Cocone2.
                           = Hq' (δ x) @ (1 @@ cohq C' x))
     : C = C'.
   Admitted.
-
-  Lemma concat_pp_p_p_pp :
-    ∀ (A : Type) (x y z t : A) (p : x = y) (q : y = z) 
-      (r : z = t), @concat_pp_p _ _ _ _ _ p q r = (@concat_p_pp _ _ _ _ _ p q r)^.
-  Proof.
-    intros A0 x y z t p q0 r. path_induction. reflexivity.
-  Defined.
-
-  Lemma concat_p1_pp :
-    forall (A:Type) (x y:A) (p:x = y) ,
-      concat_p1 (p @ 1) = whiskerR (concat_p1 p) 1.
-  Proof.
-    destruct p; reflexivity.
-  Defined.
-
-  Lemma concat2_V1_p (X:Type) (x:X) (r:x=x) (p:1 = r)
-    : (p^ @@ (idpath (idpath x))) @@ p= concat_p1 (r @ 1) @ (concat_p1 r @ (concat_1p r)^).
-  Proof.
-    destruct p; reflexivity.
-  Defined.
-
-  Lemma concat2_p_pp (A' : Type) (w x y z : A') (p p' : w = x) (q q' : x = y) (r r' : y = z)
-        (s:p=p') (s':q=q') (s'':r=r')
-    : s @@ (s' @@ s'') = (concat_p_pp) @ (((s @@ s') @@ s'') @ (concat_pp_p)).
-  Proof.
-    destruct s, s', s'', p, q, r; reflexivity.
-  Defined.
-
-  Lemma concat2_pp_p (A' : Type) (w x y z : A') (p p' : w = x) (q q' : x = y) (r r' : y = z)
-        (s:p=p') (s':q=q') (s'':r=r')
-    : (s @@ s') @@ s'' = (concat_pp_p) @ ((s @@ (s' @@ s'')) @ (concat_p_pp)).
-  Proof.
-    destruct s, s', s'', p, q, r; reflexivity.
-  Defined.
-
-  Lemma foo (X:Type) (x y z:X) (r s t: x = y) (p:r=s) (q:s=t) (pp:y=z)
-    : (p @ q) @@ (idpath pp) = whiskerR (p @ q) pp.
-  Proof.
-    reflexivity.
-  Defined.
-
-  Lemma concat_ap_Vp (X:Type) (x y:X) (p q:x=y) (r:p = q)
-    : ap (λ u, u^ @ u) r = concat_Vp p @ (concat_Vp q)^.
-  Proof.
-    destruct r; symmetry; apply concat_pV.
-  Defined.
-
   
   Definition equiv_delta_cocone Z : cech2_delta_cocone Z <~> cech2_delta_cocone' Z.
   Proof.
@@ -270,67 +223,23 @@ Module Cocone2.
       rapply path_cocone'; intro x; cbn.
       + reflexivity.
       + exact (concat_p1 _ @ concat_p1 _ @ (concat_1p _)^).
-      + cbn. refine (concat_p1 _ @ _).
-        match goal with
-        | |- (?UU @ ?p1) @@ ?p2 = ?p3 =>
-          refine (transport (λ U, U @@ p2 = _) (concat_p1 UU)^ _)
-        end.
-        apply moveL_pM.
-        rewrite concat2_inv; cbn.
-        refine (concat_concat2 _ _ _ _ @ _).
-        rewrite (concat_1p (H1 x)^).
-        match goal with
-        | |- (?UU @ ?p1) @@ ?p2 = ?p3 =>
-          refine (transport (λ U, U @@ p2 = _) (concat_p1 UU)^ _)
-        end.
-        pose (concat2_V1_p _ _ _ (H1 x)^).
-        rewrite inv_V in p. rewrite p.
-        apply concat_p_pp.
+      + cbn. set (H1' := H1 x) in *; clearbody H1'; clear H1.
+        set (H' := H (δ x)) in *; clearbody H'; clear H.
+        rewrite <- (inv_V H1').
+        destruct H1'^. reflexivity.
     - intros [q1 q2 H1 H2 K coh1 coh2].
       rapply path_cocone; intro x; cbn; try reflexivity.
-      (* refine (concat_pV_p _ _  @ _). *)
       refine (concat_pp_p @ _).
       refine ((1 @@ concat_Vp _) @ _).
-      (* symmetry; apply concat_1p. *)
       exact (concat_p1 _ @ (concat_1p _)^).
-
-      
-      apply moveR_pM.
-      rewrite !concat_pp_p. rewrite concat2_inv.
-      rewrite concat_concat2. cbn.
-      rewrite foo.
-      rewrite whiskerR_pp.
-      unfold whiskerR.
-      rewrite <- (apD (λ U, (concat_p1 (U) @ (concat_1p (U))^)) (coh1 x)^).
-      rewrite transport_paths_FlFr. cbn.
-      rewrite ap_V, inv_V.
-      rewrite concat_ap_Fpq. unfold whiskerR. cbn.
-      rewrite ap_idmap.
-      rewrite concat_ap_pFq. unfold whiskerL. cbn.
-      rewrite ap_idmap.
-      rewrite !concat_p_pp.
-      rewrite !concat2_1p. rewrite whiskerL_pp.
-      unfold whiskerL.
-      rewrite !concat_p_pp.
-      match goal with
-      |[|- _ = ((_ @ (?P1 @@ ?P2^)) @ _) @ _]
-       => pose (concat2_inv P1 P2)
-      end. cbn in p.
-      rewrite <- p.
-      rewrite (concat_pV_p _ (1 @@ coh1 x)).
-      Arguments concat_pp_p {_ _ _ _ _} p q r.
-      match goal with
-      |[|- _ @ ?P = _] => pose proof P
-      end.
-
-      rewrite concat_concat2.
-      cbn.
-      apply moveL_pM.
-      rewrite concat2_inv. rewrite inv_V; cbn.
-      rewrite concat_concat2. cbn.
-      
-  
-      admit.
+      set (coh1' := coh1 x); clearbody coh1'; clear coh1.
+      set (coh2' := coh2 x); clearbody coh2'; clear coh2.
+      set (H1' := H1 (δ x)) in *; clearbody H1'; clear H1.
+      set (H2' := H2 (δ x)) in *; clearbody H2'; clear H2.
+      set (K' := K x) in *; clearbody K'; clear K.
+      destruct coh2', coh1'. cbn in *.
+      set (q1' := q1 x) in *; clearbody q1'; clear q1.
+      destruct H1'. reflexivity.
   Defined.
 
 
@@ -360,36 +269,24 @@ Module Cocone2.
 
   Definition cestbon Z : is_colimit' Z -> is_colimit Z.
   Proof.
-    (* intros [C HC]. *)
-    (* exists ((equiv_delta_cocone _)^-1 C). *)
-    (* intro Y. *)
-    (* match goal with *)
-    (* | |- IsEquiv ?F => assert (eq: F = (equiv_delta_cocone Y)^-1 o (postcompose_cocone' C Y)) *)
-    (* end. { *)
-    (*   funext g. *)
-    (*   rapply path_cocone. *)
-    (*   all: intro; cbn; try reflexivity. *)
-    (*   exact (concat_p1 _ @ (concat_1p _)^). *)
-    (*   refine (concat_p1 _ @ _). *)
-    (*   change ( ap (ap g) (cohq C x) @@ 1 *)
-    (*            = (concat_p1 (ap g (Hq C (δ x))) @ (concat_1p (ap g (Hq C (δ x))))^) @ (1 @@ ap (ap g) (cohq C x)) ). *)
-    (*   set (ap (ap g) (cohq C x)). *)
-    (*   set (ap g (Hq C (δ x))). *)
-    (*   Lemma pouet `(p: x = x :> WW) (e: p = 1) *)
-    (*     : e @@ 1 = (concat_p1 p @ (concat_1p p)^) @ (1 @@ e). *)
-    (*                  rewrite concat2_p1. *)
-    (*                  rewrite concat2_1p. *)
-    (*                  rewrite concat_pp_p. *)
-    (*                  pose (whiskerL_1p e). *)
-    (*                  pose (moveL_pV _ _ _ p0). *)
-    (*                  rewrite p1. clear. *)
-    (*                  apply moveL_Mp. *)
-    (*                  apply moveL_pV. *)
-    (*                  rapply @whiskerR_p1. *)
-    (*   Defined. *)
-    (*   exact (pouet p0 p). }  *)
-    (* rewrite eq. *)
-    (* apply isequiv_compose. *) admit.
+    intros [C HC].
+    exists ((equiv_delta_cocone _)^-1 C).
+    intro Y.
+    refine (isequiv_homotopic
+              ((equiv_delta_cocone Y)^-1 o (postcompose_cocone' C Y))
+              (H:=isequiv_compose) _).
+    intro g. rapply path_cocone.
+    all: intro; try reflexivity.
+    exact (concat_p1 _ @ (concat_1p _)^).
+    refine (concat_p1 _ @ _).
+    change ( ap (ap g) (cohq C x) @@ 1
+             = (concat_p1 (ap g (Hq C (δ x)))
+                          @ (concat_1p (ap g (Hq C (δ x))))^)
+                 @ (1 @@ ap (ap g) (cohq C x)) ).
+    set (coh := cohq C x); clearbody coh.
+    set (Hq := Hq C (δ x)) in *; clearbody Hq.
+    rewrite <- (inv_V coh). destruct coh^.
+    reflexivity.
   Defined.
 
   Definition ksdj' : is_colimit' (KP f).
@@ -426,85 +323,11 @@ Module Cocone2.
         pose (moveL_Vp _ _ _ p2).
         refine (p3 @ _). clear. cbn. hott_simpl.
         refine (concat_p1 _ @ _ @ concat_p_pp).
-        assert (p0 @ cohq x = ap (ap y) (kp_eq2 x)). admit.
+        assert (p0 @ cohq x = ap (ap y) (kp_eq2 x)). {
+          refine (_^ @ ap02_is_ap y (kp_eq2 x)).
+          refine (KP_rec_beta_kp_eq2 _ _ _ _ _). }
         rewrite X. f_ap.
       + intro g; cbn.
         apply path_forall; intro x.
-        cbn.
-        admit.
+        admit.                  (* ok : KP_eta *)
   Defined.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  (* Definition cech2_delta_cocone Z := *)
-  (*   ∃ (q : (A -> Z) * (A2 -> Z)) *)
-  (*     (H : ((fst q) o π1 = (snd q)) * ((fst q) o π2 = (snd q)) * ((fst q) = (snd q) o δ)), *)
-  (*     (forall x, ap10 (fst (fst H)) (δ x) = ap10 (snd H) x) * (forall x, ap10 (snd (fst H)) (δ x) = ap10 (snd H) x). *)
-
-  (* Definition cech2_delta_cocone' Z := *)
-  (*   ∃ (q : A -> Z) *)
-  (*     (H : q o π1 = q o π2), *)
-  (*     (forall x, ap10 H (δ x) = 1). *)
-
-  (* Definition equiv_delta_cocone Z : cech2_delta_cocone Z <~> cech2_delta_cocone' Z. *)
-  (* Proof. *)
-  (*   rapply @equiv_adjointify. *)
-  (*   - intros [[q1 q2] [[[H1 H2] K] [L1 L2]]]; cbn in *. *)
-  (*     exists q1. exists (H1 @ H2^). *)
-  (*     intro x. refine (ap10_pp _ _ _ @ _). *)
-  (*     refine (1 @@ ap10_V _ _ @ _). *)
-  (*     apply moveR_pV. refine (_ @ (concat_1p _)^). *)
-  (*     exact (L1 x @ (L2 x)^). *)
-  (*   - intros [q [H H1]]. *)
-  (*     exists (q, q o π2). exists ((H, 1), 1) . *)
-  (*     cbn. exact (H1 , λ _, 1). *)
-  (*   - intros [q [H H1]]; cbn. *)
-  (*     refine (path_sigma' _ 1 _); cbn. *)
-  (*     refine (path_sigma' _ _ _); cbn. *)
-  (*     apply concat_p1. *)
-  (*     funext x. rewrite transport_forall_constant.  *)
-  (*     rewrite transport_paths_Fl. hott_simpl. *)
-  (*     transitivity (1 @ H1 x). 2: apply concat_1p. *)
-  (*     refine (_ @@ 1). refine (concat_p1 _ @@ 1 @ _). *)
-  (*     rewrite concat_pp_p. *)
-  (*     apply moveR_Vp. rewrite concat_p1. *)
-  (*     admit. *)
-  (*   - intros [[q1 q2] [[[H1 H2] K] [L1 L2]]]; cbn in *. *)
-  (*     refine (path_sigma' _ _ _); cbn. *)
-  (*     refine (path_prod' 1 H2). Opaque path_prod.  *)
-  (*     rewrite transport_sigma; cbn. *)
-  (*     refine (path_sigma' _ _ _); cbn. *)
-  (*     rewrite transport_prod; cbn. *)
-  (*     refine (path_prod' _ _). *)
-  (*     rewrite transport_prod; cbn. *)
-  (*     refine (path_prod' _ _). *)
-  (*     rewrite transport_paths_FlFr. *)
-  (*     unfold path_prod'; rewrite ap_snd_path_prod. *)
-  (*     admit. *)
-  (*     rewrite transport_paths_FlFr. *)
-  (*     unfold path_prod'; rewrite ap_snd_path_prod. *)
-  (*     admit. *)
-  (*     rewrite transport_paths_FlFr. *)
-  (*     unfold path_prod'; rewrite ap_fst_path_prod. *)
-  (*     hott_simpl. *)
-  (*     admit. *)
-
-      
-  (*     cbn. *)
