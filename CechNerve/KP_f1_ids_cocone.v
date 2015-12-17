@@ -30,6 +30,8 @@ Module Cocone.
   Let g1 : A3 -> A := λ w, w.1.
   Let g2 : A3 -> A := λ w, w.2.1.
   Let g3 : A3 -> A := λ w, w.2.2.1.
+  
+  Let δ : A -> A2 := λ x, (x; (x; 1)).
 
   Record cech3_cocone Z :=
     { q1 : A -> Z;
@@ -43,12 +45,15 @@ Module Cocone.
       L1 : q1 o g1 == q3;
       L2 : q1 o g2 == q3;
       L3 : q1 o g3 == q3;
-      coh1 : forall x, H1 (f2 x) @ K2 x = L1 x;
-      coh2 : forall x, H1 (f3 x) @ K3 x = L1 x;
-      coh3 : forall x, H1 (f1 x) @ K1 x = L2 x;
-      coh4 : forall x, H2 (f3 x) @ K3 x = L2 x;
-      coh5 : forall x, H2 (f1 x) @ K1 x = L3 x;
-      coh6 : forall x, H2 (f2 x) @ K2 x = L3 x
+      M : q2 o δ == q1;
+      coh1 : forall x, H1 (f2 x) @ K2 x = L1 x; (* π1 o f2 = g1 *)
+      coh2 : forall x, H1 (f3 x) @ K3 x = L1 x; (* π1 o f3 = g1 *)
+      coh3 : forall x, H1 (f1 x) @ K1 x = L2 x; (* π1 o f1 = g2 *)
+      coh4 : forall x, H2 (f3 x) @ K3 x = L2 x; (* π2 o f3 = g2 *)
+      coh5 : forall x, H2 (f1 x) @ K1 x = L3 x; (* π2 o f1 = g3 *)
+      coh6 : forall x, H2 (f2 x) @ K2 x = L3 x; (* π2 o f2 = g3 *)
+      coh7 : forall x, H1 (δ x) @ M x = 1; (* π1 o δ = id *)
+      coh8 : forall x, H2 (δ x) @ M x = 1 (* π2 o δ = id *)
     }.
   
   Let f' := KP_rec B f (λ _ _ h, h) (λ _, 1).
@@ -92,28 +97,45 @@ Module Cocone.
     refine (_ @ (bar _ _ _ _ _)^).
     rewrite !foo1. reflexivity.
   Defined.
-
-
   
   Goal cech3_cocone (KP f').
-    refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
+    refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
     exact (kp o kp).
     exact (kp o kp o π2).
     exact (kp o kp o g3).
-    all: intro x. all: try reflexivity.
+    all: intro x; cbn. all: try reflexivity.
     - refine (kp_eq _ (kp x.1) (kp x.2.1) x.2.2).
-    - cbn; unfold g3. exact (ap kp (kp_eq _ _ _ (snd x.2.2.2))).
-    - cbn. refine (_ @ (concat_p1 _)^).
-      apply cequifaut.
+    - unfold g3. exact (ap kp (kp_eq _ _ _ (snd x.2.2.2))).
+    - cbn. refine (_ @ (concat_p1 _)^). apply cequifaut.
     - cbn. refine (concat_1p _ @ _ @ (concat_p1 _)^).
       apply foo1.
+    - cbn. exact (kp_eq2 _ @@ 1).
   Defined.
 
+  
+  Lemma toward_universality Z : (cech3_cocone Z) -> (KP f' -> Z).
+  Proof.
+    intros [q1 q2 q3 H1 H2 K1 K2 K3 L1 L2 L3 M coh1 coh2 coh3 coh4 coh5 coh6 coh7 coh8].
+    rapply @KP_rec. rapply @KP_rec.
+    - exact q1.
+    - intros a b p. exact (H1 (a; (b; p)) @ (H2 _)^).
+    - intro a; cbn.
+      pose proof (moveL_pV _ _ _ (coh7 a) @ concat_1p _).
+      pose proof (moveL_Vp _ _ _ (coh8 a) @ concat_p1 _).
+      refine (X @@ X0^ @ _). apply concat_Vp.
+    - intros a b p; cbn. admit.
+    - intros a; cbn.
+  Abort.
+
+
+  
+  
   Require Import HoTT.
 
   Definition Im := ∃ (y: B), Trunc (-1) (∃ x, f x = y).
 
   Let im : A -> Im := (λ x, (f x; tr (x; 1))).
+
   
   Lemma im_cocone : cech3_cocone Im.
     refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
