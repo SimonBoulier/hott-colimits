@@ -184,6 +184,52 @@ Module Cocone2.
     : C = C'.
   Admitted.
 
+  Lemma concat_pp_p_p_pp :
+    ∀ (A : Type) (x y z t : A) (p : x = y) (q : y = z) 
+      (r : z = t), @concat_pp_p _ _ _ _ _ p q r = (@concat_p_pp _ _ _ _ _ p q r)^.
+  Proof.
+    intros A0 x y z t p q0 r. path_induction. reflexivity.
+  Defined.
+
+  Lemma concat_p1_pp :
+    forall (A:Type) (x y:A) (p:x = y) ,
+      concat_p1 (p @ 1) = whiskerR (concat_p1 p) 1.
+  Proof.
+    destruct p; reflexivity.
+  Defined.
+
+  Lemma concat2_V1_p (X:Type) (x:X) (r:x=x) (p:1 = r)
+    : (p^ @@ (idpath (idpath x))) @@ p= concat_p1 (r @ 1) @ (concat_p1 r @ (concat_1p r)^).
+  Proof.
+    destruct p; reflexivity.
+  Defined.
+
+  Lemma concat2_p_pp (A' : Type) (w x y z : A') (p p' : w = x) (q q' : x = y) (r r' : y = z)
+        (s:p=p') (s':q=q') (s'':r=r')
+    : s @@ (s' @@ s'') = (concat_p_pp) @ (((s @@ s') @@ s'') @ (concat_pp_p)).
+  Proof.
+    destruct s, s', s'', p, q, r; reflexivity.
+  Defined.
+
+  Lemma concat2_pp_p (A' : Type) (w x y z : A') (p p' : w = x) (q q' : x = y) (r r' : y = z)
+        (s:p=p') (s':q=q') (s'':r=r')
+    : (s @@ s') @@ s'' = (concat_pp_p) @ ((s @@ (s' @@ s'')) @ (concat_p_pp)).
+  Proof.
+    destruct s, s', s'', p, q, r; reflexivity.
+  Defined.
+
+  Lemma foo (X:Type) (x y z:X) (r s t: x = y) (p:r=s) (q:s=t) (pp:y=z)
+    : (p @ q) @@ (idpath pp) = whiskerR (p @ q) pp.
+  Proof.
+    reflexivity.
+  Defined.
+
+  Lemma concat_ap_Vp (X:Type) (x y:X) (p q:x=y) (r:p = q)
+    : ap (λ u, u^ @ u) r = concat_Vp p @ (concat_Vp q)^.
+  Proof.
+    destruct r; symmetry; apply concat_pV.
+  Defined.
+
   
   Definition equiv_delta_cocone Z : cech2_delta_cocone Z <~> cech2_delta_cocone' Z.
   Proof.
@@ -191,9 +237,8 @@ Module Cocone2.
     - intros [q1 q2 H1 H2 K coh1 coh2].
       rapply @Build_cech2_delta_cocone'.
       exact q1. intro x. exact (H1 x @ (H2 _)^).
-      intro x; cbn. apply moveR_pV.
-      refine (_ @ (concat_1p _)^).
-      exact (coh1 x @ (coh2 x)^).
+      intro x; cbn.
+      exact ((coh1 x @@ inverse2 (coh2 x)) @ concat_pV _).
     - intros [q H H1].
       rapply @Build_cech2_delta_cocone.
       exact q. exact (q o π2). exact H. exact (λ _, 1).
@@ -203,12 +248,66 @@ Module Cocone2.
       rapply path_cocone'; intro x; cbn.
       + reflexivity.
       + exact (concat_p1 _ @ concat_p1 _ @ (concat_1p _)^).
-      + cbn. refine (concat_p1 _ @ _). admit.
+      + cbn. refine (concat_p1 _ @ _).
+        match goal with
+        | |- (?UU @ ?p1) @@ ?p2 = ?p3 =>
+          refine (transport (λ U, U @@ p2 = _) (concat_p1 UU)^ _)
+        end.
+        apply moveL_pM.
+        rewrite concat2_inv; cbn.
+        refine (concat_concat2 _ _ _ _ @ _).
+        rewrite (concat_1p (H1 x)^).
+        match goal with
+        | |- (?UU @ ?p1) @@ ?p2 = ?p3 =>
+          refine (transport (λ U, U @@ p2 = _) (concat_p1 UU)^ _)
+        end.
+        pose (concat2_V1_p _ _ _ (H1 x)^).
+        rewrite inv_V in p. rewrite p.
+        apply concat_p_pp.
     - intros [q1 q2 H1 H2 K coh1 coh2].
       rapply path_cocone; intro x; cbn; try reflexivity.
+      (* refine (concat_pV_p _ _  @ _). *)
       refine (concat_pp_p @ _).
       refine ((1 @@ concat_Vp _) @ _).
+      (* symmetry; apply concat_1p. *)
       exact (concat_p1 _ @ (concat_1p _)^).
+
+      
+      apply moveR_pM.
+      rewrite !concat_pp_p. rewrite concat2_inv.
+      rewrite concat_concat2. cbn.
+      rewrite foo.
+      rewrite whiskerR_pp.
+      unfold whiskerR.
+      rewrite <- (apD (λ U, (concat_p1 (U) @ (concat_1p (U))^)) (coh1 x)^).
+      rewrite transport_paths_FlFr. cbn.
+      rewrite ap_V, inv_V.
+      rewrite concat_ap_Fpq. unfold whiskerR. cbn.
+      rewrite ap_idmap.
+      rewrite concat_ap_pFq. unfold whiskerL. cbn.
+      rewrite ap_idmap.
+      rewrite !concat_p_pp.
+      rewrite !concat2_1p. rewrite whiskerL_pp.
+      unfold whiskerL.
+      rewrite !concat_p_pp.
+      match goal with
+      |[|- _ = ((_ @ (?P1 @@ ?P2^)) @ _) @ _]
+       => pose (concat2_inv P1 P2)
+      end. cbn in p.
+      rewrite <- p.
+      rewrite (concat_pV_p _ (1 @@ coh1 x)).
+      Arguments concat_pp_p {_ _ _ _ _} p q r.
+      match goal with
+      |[|- _ @ ?P = _] => pose proof P
+      end.
+
+      rewrite concat_concat2.
+      cbn.
+      apply moveL_pM.
+      rewrite concat2_inv. rewrite inv_V; cbn.
+      rewrite concat_concat2. cbn.
+      
+  
       admit.
   Defined.
 
@@ -307,7 +406,10 @@ Module Cocone2.
         refine (concat_p1 _ @ _ @ concat_p_pp).
         assert (p0 @ cohq x = ap (ap y) (kp_eq2 x)). admit.
         rewrite X. f_ap.
-      + intro g; cbn. admit.
+      + intro g; cbn.
+        apply path_forall; intro x.
+        cbn.
+        admit.
   Defined.
 
 
