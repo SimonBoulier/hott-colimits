@@ -62,30 +62,6 @@ Module Cocone.
     Arguments kp_eq {_ _} _ _ _ _.
 
     
-    Lemma kp_eq_concat1 (a b c: A) (p: f b = f c) (q: f a = f c)
-      : kp_eq f' (kp a) (kp b) (q @ p^) @ ap kp (kp_eq f b c p) = kp_eq f' (kp a) (kp c) q.
-    Proof.
-      clear.
-      pose (X := apD (kp_eq f' (kp a)) (kp_eq _ _ _ p)); cbn in X.
-      pose (X' := ap10 X q); subst X.
-      rewrite transport_arrow in X'.
-      rewrite !transport_paths_Fr in X'.
-      rewrite ap_V in X'. unfold f' in X'; rewrite KP_rec_beta_kp_eq in X'.
-      assumption.
-    Defined.
-    
-    Lemma kp_eq_concat2 (a b c: A) (p: f b = f c) (q: f c = f a)
-      : kp_eq f' (kp b) (kp a) (p @ q) = ap kp (kp_eq f b c p) @ kp_eq f' (kp c) (kp a) q.
-    Proof.
-      clear. pose (kp_eq f _ _ p).
-      pose (X := apD (λ w, kp_eq f' w (kp a)) p0); cbn in X.
-      pose (X' := ap10 X q); subst X p0.
-      rewrite transport_arrow in X'.
-      rewrite !transport_paths_Fl in X'.
-      rewrite ap_V, inv_V in X'. unfold f' in X'; rewrite KP_rec_beta_kp_eq in X'.
-      apply moveL_Mp. assumption.
-    Defined.
-
     Lemma kp_eq_is_ap_kp a b (p: f a =  f b)
       : ap kp (kp_eq f a b p) = kp_eq f' (kp a) (kp b) p.
     Proof.
@@ -93,17 +69,35 @@ Module Cocone.
       unfold f'; rapply @KP_rec_beta_kp_eq.
     Defined.
 
+    Lemma kp_eq_concat (a b c: A) (p: f a = f b) (q: f b = f c)
+      : kp_eq f' (kp a) (kp c) (p @ q) =
+        kp_eq f' (kp a) (kp b) p @ kp_eq f' (kp b) (kp c) q.
+    Proof.
+      clear. pose (kp_eq f _ _ p).
+      pose (X := apD (λ w, kp_eq f' w (kp c)) p0); cbn in X.
+      pose (X' := ap10 X q); subst X p0.
+      rewrite transport_arrow in X'.
+      rewrite !transport_paths_Fl in X'.
+      rewrite ap_V, inv_V in X'. unfold f' in X'; rewrite KP_rec_beta_kp_eq in X'.
+      apply moveL_Mp. rewrite kp_eq_is_ap_kp in X'. assumption.
+    Defined.
+
     Goal Cech3_cocone (KP' f').
       refine (Build_Cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
       exact (kp o kp).
       exact (kp o kp o π2).
       exact (kp o kp o g3).
-      all: intro x; cbn. all: try reflexivity.
-      - refine (kp_eq _ (kp x.1) (kp x.2.1) x.2.2).
-      - unfold g3. exact (ap kp (kp_eq _ _ _ (snd x.2.2.2))).
-      - cbn. refine (_ @ (concat_p1 _)^).
-        refine (_ @ (kp_eq_concat2 _ _ _ _ _)^).
-        rewrite !kp_eq_is_ap_kp. reflexivity.
+      all: intro x; unfold g1, g2, g3, f1, f2, f3; cbn.
+      all: try reflexivity.
+      refine (kp_eq _ (kp x.1) (kp x.2.1) x.2.2).
+      (* reflexivity. reflexivity. reflexivity. *)
+      exact (ap kp (kp_eq _ _ _ (snd x.2.2.2))).
+      (* apply ap, kp_eq. unfold A3 in x. exact (fst x.2.2.2 @ snd x.2.2.2).  *)
+      (* apply ap, kp_eq. unfold A3 in x. exact (snd x.2.2.2).  *)
+      (* reflexivity. reflexivity. *)
+      (* all: cbn; try reflexivity. *)
+      - cbn. refine (_^ @ (concat_p1 _)^).
+        rewrite kp_eq_is_ap_kp. apply kp_eq_concat.
       - cbn. refine (concat_1p _ @ _ @ (concat_p1 _)^).
         apply kp_eq_is_ap_kp.
       - cbn. exact (kp_eq2 _ @@ 1).
