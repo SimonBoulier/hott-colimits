@@ -98,11 +98,12 @@ endif
 #                    #
 ######################
 
-VFILES:=CechNerve/CechNerve.v\
-  CechNerve/KP_v2_mono.v\
-  CechNerve/KernelPair_v2.v\
-  CechNerve/KernelPair_v1.v\
-  CechNerve/MappingTelescope.v\
+VFILES:=IteratedKernelPair/link_KPv2_CechNerve.v\
+  IteratedKernelPair/KPv2_mono.v\
+  IteratedKernelPair/IteratedKernelPair.v\
+  IteratedKernelPair/KernelPair_v2.v\
+  IteratedKernelPair/KernelPair_v1.v\
+  IteratedKernelPair/MappingTelescope.v\
   Colimit_trunc.v\
   Diagram.v\
   CommutativeSquares.v\

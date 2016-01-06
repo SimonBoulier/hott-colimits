@@ -7,8 +7,8 @@ Generalizable All Variables.
 Context `{Funext}.
 
 Module Export KP.
-  Private Inductive KP {A B:Type} (f: A -> B) : Type :=
-  | kp : A -> (KP f).
+  Private Inductive KP' {A B:Type} (f: A -> B) : Type :=
+  | kp : A -> (KP' f).
 
   Axiom kp_eq : forall {A B} {f: A -> B} (a b: A), f a = f b -> kp f a = kp f b.
 
@@ -16,7 +16,7 @@ Module Export KP.
 
   Arguments kp {A B f} a.
 
-  Definition KP_ind {A B: Type} {f: A -> B} (P: KP f -> Type)
+  Definition KP_ind {A B: Type} {f: A -> B} (P: KP' f -> Type)
              (kp': forall a, P (kp a))
              (kp_eq': forall a b p, transport P (kp_eq a b p) (kp' a) = kp' b)
              (kp_eq2': forall a, transport2 P (kp_eq2 a) (kp' a) = kp_eq' a a 1)
@@ -25,14 +25,14 @@ Module Export KP.
                 |kp a => fun _ => kp' a
                 end kp_eq2'.
 
-  Axiom KP_ind_beta_kp_eq : forall {A B: Type} {f: A -> B} (P: KP f -> Type)
+  Axiom KP_ind_beta_kp_eq : forall {A B: Type} {f: A -> B} (P: KP' f -> Type)
                                    (kp': forall a, P (kp a))
                                    (kp_eq': forall a b p, transport P (kp_eq a b p) (kp' a) = kp' b)
                                    (kp_eq2': forall a, transport2 P (kp_eq2 a) (kp' a) = kp_eq' a a 1)
                                    a b p,
       apD (KP_ind P kp' kp_eq' kp_eq2') (kp_eq a b p) = kp_eq' a b p.
 
-  Axiom KP_ind_beta_kp_eq2 : forall {A B:Type} {f:A -> B} (P : KP f -> Type)
+  Axiom KP_ind_beta_kp_eq2 : forall {A B:Type} {f:A -> B} (P : KP' f -> Type)
              (kp': forall a, P (kp a))
              (kp_eq': forall a b p, transport P (kp_eq a b p) (kp' a) = kp' b)
              (kp_eq2': forall a, transport2 P (kp_eq2 a) (kp' a) = kp_eq' a a 1)
@@ -43,12 +43,12 @@ Module Export KP.
              (kp': A -> P)
              (kp_eq': forall (a b: A) (p: f a = f b), kp' a = kp' b)
              (kp_eq2': forall a, kp_eq' a a 1 = 1)
-    : KP f -> P.
+    : KP' f -> P.
   Proof.
     refine (KP_ind _ kp' (fun a b p => transport_const _ _ @ kp_eq' a b p)  _).
     intro a.
-    exact ((whiskerL (transport2 (λ _ : KP f, P) (kp_eq2 a) (kp' a)) (kp_eq2' a) @ concat_p1 _)^
-           @ (whiskerR (transport2_const (A:=KP f) (B:= P) (kp_eq2 a) (kp' a) @ concat_p1 _)^ (kp_eq' a a 1))).
+    exact ((whiskerL (transport2 (λ _ : KP' f, P) (kp_eq2 a) (kp' a)) (kp_eq2' a) @ concat_p1 _)^
+           @ (whiskerR (transport2_const (A:=KP' f) (B:= P) (kp_eq2 a) (kp' a) @ concat_p1 _)^ (kp_eq' a a 1))).
   Defined.
 
   Definition KP_rec_beta_kp_eq {A B: Type} {f: A -> B} (P: Type)
@@ -69,7 +69,7 @@ Module Export KP.
   Proof.
   Admitted.
 
-  Definition KP_eta `{f: A -> B} {Z} (F G: KP f -> Z)
+  Definition KP_eta `{f: A -> B} {Z} (F G: KP' f -> Z)
              (H1: F o kp == G o kp)
              (H2: forall x y p, H1 x @ ap G (kp_eq x y p) = ap F (kp_eq x y p) @ H1 y)
              (H3: forall x, H2 x x 1
@@ -87,7 +87,7 @@ Module Export KP.
   Defined.
 
   Lemma transport_KP `{f: forall (z: Z), A z -> B z} `(p: z1 = z2 :> Z) (x: A z1)
-    : transport (λ z, KP (f z)) p (kp x) = kp (p # x).
+    : transport (λ z, KP' (f z)) p (kp x) = kp (p # x).
       by destruct p.
   Defined.
 End KP.
@@ -97,7 +97,7 @@ Definition KP_equiv_fun `{ua: Univalence} {A B C:Type}
            (g: C -> B)
            (α: A -> C)
            (e: g o α = f)
-  : KP f -> KP g.
+  : KP' f -> KP' g.
 Proof.
   refine (KP_rec _ _ _ _).
   intro a; apply kp. exact (α a).
@@ -120,7 +120,7 @@ Definition isequiv_KP_equiv_fun_path `{ua: Univalence} {A B C:Type}
 Proof.
   destruct α. cbn. destruct e.
   unfold KP_equiv_fun; cbn.
-  assert ((KP_rec (KP g) (λ a : A, kp a)
+  assert ((KP_rec (KP' g) (λ a : A, kp a)
         (λ (a b : A) (p : g a = g b), kp_eq a b ((1 @ p) @ 1))
         (λ a : A, 1 @ kp_eq2 a)) == idmap).
   { refine (KP_eta _ _ _ _ _).
@@ -164,7 +164,7 @@ Proof.
     rewrite concat_p1.
     repeat rewrite concat_pp_p. apply whiskerL.
     repeat rewrite ap_V.
-    rewrite <- (ap02_is_ap (KP_rec (KP g) (λ a0 : A, kp a0)
+    rewrite <- (ap02_is_ap (KP_rec (KP' g) (λ a0 : A, kp a0)
             (λ (a0 b : A) (p : g a0 = g b), kp_eq a0 b ((1 @ p) @ 1))
             (λ a0 : A, 1 @ kp_eq2 a0))).
     rewrite KP_rec_beta_kp_eq2.
@@ -197,7 +197,7 @@ Qed.
 
 
 Section T.
-  Definition T (X: Type) := KP (λ x: X, tt).
+  Definition T (X: Type) := KP' (λ x: X, tt).
 
   Definition α {X} : X -> T X := kp.
   
@@ -225,9 +225,9 @@ End T.
 Section KP_Sigma.
 
   Lemma KP_pr1_to_sigma (Y:Type) (A:Y -> Type) 
-  : KP (λ x : ∃ y : Y, A y, pr1 x) <~> (∃ y : Y, KP (λ _ : A y, tt)).
+  : KP' (λ x : ∃ y : Y, A y, pr1 x) <~> (∃ y : Y, KP' (λ _ : A y, tt)).
   Proof.
-    transparent assert (F : ((∃ y : Y, KP (λ _ : A y, tt)) -> KP (λ x : ∃ y : Y, A y, pr1 x))).
+    transparent assert (F : ((∃ y : Y, KP' (λ _ : A y, tt)) -> KP' (λ x : ∃ y : Y, A y, pr1 x))).
   { intros [y a].
     refine (KP_rec _ _ _ _ a).
     intro x. apply kp.
@@ -238,7 +238,7 @@ Section KP_Sigma.
     intro u; cbn.
     match goal with |[|- @kp_eq _ _ ?ff ?aa ?bb _ = _] => exact (kp_eq2 (f:=ff) aa)  end. }
 
-  transparent assert (G: (KP (λ x : ∃ y : Y, A y, pr1 x) -> (∃ y : Y, KP (λ _ : A y, tt)))).
+  transparent assert (G: (KP' (λ x : ∃ y : Y, A y, pr1 x) -> (∃ y : Y, KP' (λ _ : A y, tt)))).
   { refine (KP_rec _ _ _ _).
     intros x. exists x.1. apply kp. exact x.2.
     intros a b p. cbn.
@@ -280,7 +280,7 @@ Section KP_Sigma.
 
     intro a; cbn. rewrite transport_paths_FlFr.
     rewrite concat_ap_Fpq. rewrite concat_ap_pFq.
-    simpl. rewrite (concat_p1 (whiskerL 1 (ap (ap (exist (λ y0 : Y, KP (λ _ : A y0, tt)) y)) (kp_eq2 a)^))^).
+    simpl. rewrite (concat_p1 (whiskerL 1 (ap (ap (exist (λ y0 : Y, KP' (λ _ : A y0, tt)) y)) (kp_eq2 a)^))^).
     repeat rewrite ap_V.
     match goal with
     |[|- _ = _ @ whiskerR (ap (ap (λ x, ?gg (?ff x))) ?pp)^ 1]
@@ -307,7 +307,7 @@ Section KP_Sigma.
      pose (rew:=  whiskerL_1p P2); rewrite concat_pp_p in rew
     end.
     apply moveL_Vp in rew. rewrite rew; clear rew. cbn.
-    rewrite (concat_1p (ap (ap (exist (λ y0 : Y, KP (λ _ : A y0, tt)) y)) (kp_eq2 a))^).
+    rewrite (concat_1p (ap (ap (exist (λ y0 : Y, KP' (λ _ : A y0, tt)) y)) (kp_eq2 a))^).
     apply moveR_pV.
     match goal with
     |[|- _ = (?P1 @ whiskerR ?hh 1) @ _] =>
@@ -344,7 +344,7 @@ Section KP_Sigma.
     rewrite concat_1p.
     apply moveR_Vp.
     pose (p := kp_eq2 (f:=λ _:A y, tt) a).
-    pose (r := apD (λ U, ap_existT (λ y0 : Y, KP (λ _ : A y0, tt)) y (kp a) (kp a) U) p^).
+    pose (r := apD (λ U, ap_existT (λ y0 : Y, KP' (λ _ : A y0, tt)) y (kp a) (kp a) U) p^).
     cbn in r; rewrite <- r; clear r; unfold p; clear p.
     rewrite transport_paths_FlFr.
     rewrite concat_p1. rewrite ap_V. rewrite inv_V. rewrite ap_V. reflexivity.
@@ -358,8 +358,8 @@ Section KP_Sigma.
     refine (_ @ (ap02 F (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^)).
     cbn in *.
     destruct p. cbn. unfold F; clear F.
-    pose (F := λ x:Y, λ x':KP (λ _ : A x, tt),
-                         KP_rec (KP (λ x0 : ∃ y : Y, A y, pr1 x0))
+    pose (F := λ x:Y, λ x':KP' (λ _ : A x, tt),
+                         KP_rec (KP' (λ x0 : ∃ y : Y, A y, pr1 x0))
                                (λ x0 : A x, kp (x; x0))
                                (λ (u v : A (x)) (_ : tt = tt),
                                 kp_eq (x; u) (x; v) (idpath x))
@@ -375,7 +375,7 @@ Section KP_Sigma.
     rewrite transport_paths_FlFr.
     rewrite concat_ap_Fpq. rewrite concat_ap_pFq.
     do 2 rewrite ap_V.
-    rewrite <- (ap02_is_ap (λ x : KP (λ x : ∃ y : Y, A y, pr1 x), F (G x))).
+    rewrite <- (ap02_is_ap (λ x : KP' (λ x : ∃ y : Y, A y, pr1 x), F (G x))).
     rewrite ap02_compose.
     cbn.
     rewrite whiskerR_RV. rewrite whiskerR_pp.
@@ -440,16 +440,16 @@ Section KP_Sigma.
     rewrite concat_V_pp.
 
     pose (p := apD (λ U, (ap_path_sigma_1
-      (λ (x0 : Y) (x' : KP (λ _ : A x0, tt)),
-       KP_rec (KP (λ x1 : ∃ y : Y, A y, pr1 x1)) (λ x1 : A x0, kp (x0; x1))
+      (λ (x0 : Y) (x' : KP' (λ _ : A x0, tt)),
+       KP_rec (KP' (λ x1 : ∃ y : Y, A y, pr1 x1)) (λ x1 : A x0, kp (x0; x1))
          (λ (u v : A x0) (_ : tt = tt), kp_eq (x0; u) (x0; v) (idpath x0))
          (λ u : A x0, kp_eq2 (x0; u)) x') a (1 @ U))) (kp_eq2 x)^). cbn in p.
     rewrite <- p; clear p.
     rewrite transport_paths_FlFr.
     cbn.
     pose (p := apD (λ U, ap_pp
-       (λ x' : KP (λ _ : A a, tt),
-        KP_rec (KP (λ x0 : ∃ y : Y, A y, pr1 x0)) (λ x0 : A a, kp (a; x0))
+       (λ x' : KP' (λ _ : A a, tt),
+        KP_rec (KP' (λ x0 : ∃ y : Y, A y, pr1 x0)) (λ x0 : A a, kp (a; x0))
           (λ (u v : A a) (_ : tt = tt), kp_eq (a; u) (a; v) (idpath a))
           (λ u : A a, kp_eq2 (a; u)) x') 1 U) (kp_eq2 x)^); cbn in p.
     rewrite <- p; clear p.
@@ -474,11 +474,11 @@ Section KP_Sigma.
        apply moveL_pV in rew
     end.
     rewrite rew; clear rew.
-    rewrite <- (ap02_is_ap (λ x' : KP (λ _ : A a, tt),
-         KP_rec (KP (λ x0 : ∃ y : Y, A y, pr1 x0)) (λ x0 : A a, kp (a; x0))
+    rewrite <- (ap02_is_ap (λ x' : KP' (λ _ : A a, tt),
+         KP_rec (KP' (λ x0 : ∃ y : Y, A y, pr1 x0)) (λ x0 : A a, kp (a; x0))
            (λ (u v : A a) (_ : tt = tt), kp_eq (a; u) (a; v) (idpath a))
            (λ u : A a, kp_eq2 (a; u)) x')).
-    rewrite (KP_rec_beta_kp_eq2 (KP (λ x0 : ∃ y : Y, A y, pr1 x0)) (λ x0 : A a, kp (a; x0))
+    rewrite (KP_rec_beta_kp_eq2 (KP' (λ x0 : ∃ y : Y, A y, pr1 x0)) (λ x0 : A a, kp (a; x0))
         (λ (u v : A a) (_ : tt = tt), kp_eq (a; u) (a; v) (idpath a))
         (λ u : A a, kp_eq2 (a; u))).
     repeat rewrite concat_pp_p.
@@ -491,12 +491,12 @@ Section KP_Sigma.
      => assert (r: 1 = foo) by apply path_ishprop; destruct r; cbn
     end.
     match goal with
-    |[|- _ = ap (λ x0, ?ff ((path_sigma' (λ x1 : Y, KP (λ _ : A x1, tt)) 1 (1 @ x0)))) ?pp ] =>
-     rewrite (ap_compose (λ x0, (path_sigma' (λ x1 : Y, KP (λ _ : A x1, tt)) 1 (1 @ x0))) ff pp)             
+    |[|- _ = ap (λ x0, ?ff ((path_sigma' (λ x1 : Y, KP' (λ _ : A x1, tt)) 1 (1 @ x0)))) ?pp ] =>
+     rewrite (ap_compose (λ x0, (path_sigma' (λ x1 : Y, KP' (λ _ : A x1, tt)) 1 (1 @ x0))) ff pp)             
     end. cbn.
     apply ap.
     rewrite ap_pp.
-    pose (p := apD (λ U,  ap (path_sigma' (λ y : Y, KP (λ _ : A y, tt)) 1)
+    pose (p := apD (λ U,  ap (path_sigma' (λ y : Y, KP' (λ _ : A y, tt)) 1)
                              (concat_1p U)) (kp_eq2 x)^); cbn in p.
     rewrite <- p; clear p.
     rewrite transport_paths_FlFr. simpl. rewrite ap_V. rewrite inv_V.
@@ -506,7 +506,7 @@ Defined.
 
   Context `(f: A -> B).
 
-  Lemma KP_slicing_fun : KP f -> {y: B & T (hfiber f y)}.
+  Lemma KP_slicing_fun : KP' f -> {y: B & T (hfiber f y)}.
   Proof.
     refine (KP_rec _ _ _ _).
     - intro a. exact (f a ; (kp (a; 1))).
@@ -518,7 +518,7 @@ Defined.
   Defined.
 
   Lemma T_to_sigmahfiber `{ua: Univalence}
-    : KP f <~> {y:B & KP (λ _:hfiber f y, tt)}.
+    : KP' f <~> {y:B & KP' (λ _:hfiber f y, tt)}.
   Proof.
     etransitivity; [idtac | exact (KP_pr1_to_sigma B (hfiber f))].
     refine (BuildEquiv (isequiv_KP_equiv_fun _ _ _ _)).
@@ -550,7 +550,7 @@ Defined.
     refine ((KP_rec_beta_kp_eq _ _ _ _ a b p) @ _).
     cbn.
     etransitivity.
-    2: exact (apD (λ U, path_sigma' (λ y : B, KP (λ _ : hfiber f y, tt)) 
+    2: exact (apD (λ U, path_sigma' (λ y : B, KP' (λ _ : hfiber f y, tt)) 
                                     U
                                     (transport_KP U (a; 1) @
                                                  kp_eq (transport (λ y : B, hfiber f y) U (a; 1)) 
@@ -628,7 +628,7 @@ Defined.
     rewrite inv_pp. rewrite concat_p_pp. rewrite concat_pV_p.
     repeat rewrite <- ap02_is_ap.
     do 3 rewrite concat_p1.
-    rewrite <- (ap02_V (exist (λ y : B, KP (λ _ : hfiber f y, tt)) (f a)) (ap (concat 1) (kp_eq2 (a; 1)))).
+    rewrite <- (ap02_V (exist (λ y : B, KP' (λ _ : hfiber f y, tt)) (f a)) (ap (concat 1) (kp_eq2 (a; 1)))).
     match goal with
     |[|- ap02 ?ff ?pp @ ap02 _ ?qq = (ap02 ?hh ?rr)^] =>
      rewrite <- (ap02_pp ff pp qq);
@@ -649,10 +649,10 @@ Defined.
     reflexivity.
   Defined.
   
-  Definition KP_slicing `{ua : Univalence} : KP f <~> {y: B & T (hfiber f y)}
+  Definition KP_slicing `{ua : Univalence} : KP' f <~> {y: B & T (hfiber f y)}
     := BuildEquiv KP_slicing_isequiv.
   
-  Definition KP_lift : KP f -> B.
+  Definition KP_lift : KP' f -> B.
   Proof.
     refine (KP_rec _ f _ _); intros; try reflexivity.
   Defined.
@@ -685,7 +685,7 @@ Defined.
       apply moveL_Vp.
       repeat rewrite concat_p_pp.
       pose (rew := whiskerL_1p (ap
-         (ap (λ x : KP f, let (proj1_sig, _) := KP_slicing_fun x in proj1_sig))
+         (ap (λ x : KP' f, let (proj1_sig, _) := KP_slicing_fun x in proj1_sig))
          (kp_eq2 a)^)).
       rewrite concat_pp_p in rew.
       apply moveL_Vp in rew.
@@ -695,7 +695,7 @@ Defined.
       repeat rewrite <- ap02_is_ap.
       unfold KP_lift.
       rewrite KP_rec_beta_kp_eq2. cbn.
-      rewrite <- (ap02_is_ap (λ x : KP f, let (proj1_sig, _) := KP_slicing_fun x in proj1_sig)).
+      rewrite <- (ap02_is_ap (λ x : KP' f, let (proj1_sig, _) := KP_slicing_fun x in proj1_sig)).
       unfold KP_slicing_fun. cbn.
       rewrite (ap02_compose _ pr1).
       rewrite KP_rec_beta_kp_eq2.
@@ -720,10 +720,10 @@ Defined.
       end.
       rewrite concat_pV_p. rewrite ap02_pp. rewrite inv_pp.
       rewrite concat_pV_p.
-      apply moveR_Vp. rewrite <- (ap_compose (concat 1) (path_sigma' (λ y : B, KP (λ _ : hfiber f y, tt)) 1) (kp_eq2 (a; 1))); cbn.
+      apply moveR_Vp. rewrite <- (ap_compose (concat 1) (path_sigma' (λ y : B, KP' (λ _ : hfiber f y, tt)) 1) (kp_eq2 (a; 1))); cbn.
       rewrite ap02_is_ap.
       unfold pr1_path.
-      rewrite (ap_compose (λ x, (path_sigma (λ y : B, KP (λ _ : hfiber f y, tt)) 
+      rewrite (ap_compose (λ x, (path_sigma (λ y : B, KP' (λ _ : hfiber f y, tt)) 
                                             (f a; kp (a; 1)) (f a; kp (a; 1)) 1 (1 @ x))) (ap pr1)).
       rewrite concat_p1.
       apply ap. cbn. reflexivity.

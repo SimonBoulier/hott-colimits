@@ -1,9 +1,13 @@
 Require Import HoTT.Basics HoTT.Types HoTT.Fibrations.
-Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.Colimit_Sigma Colimits.CechNerve.MappingTelescope.
+Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.Colimit_Sigma MappingTelescope.
 
-Require Import Colimits.CechNerve.KernelPair_v1.
-(* can be changed to KernelPair_v2. *)
 
+Require Import KernelPair_v1.
+
+(* also work with: *)
+(* Require Import KernelPair_v2. *)
+(* Notation "'KP'" := KP'. *)
+(*  *)
 
 Local Open Scope path_scope.
 Generalizable All Variables. 

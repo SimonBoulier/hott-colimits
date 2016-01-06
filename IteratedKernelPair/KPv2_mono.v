@@ -26,7 +26,7 @@ Section KP2_mono.
   Defined.
   
   Definition KP_Cover {A B:Type} (f:A -> B) (Mf : IsMono f) (a:A)
-    : KP f -> Type.
+    : KP' f -> Type.
   Proof.
     unfold IsMono in Mf.
     refine (KP_rec _ _ _ _).
@@ -42,7 +42,7 @@ Section KP2_mono.
   Defined.
 
   Definition KP_encode {A B:Type} (f:A -> B) (Mf : IsMono f) (a:A)
-    : forall b:KP f, ((kp a = b) -> KP_Cover f Mf a b).
+    : forall b:KP' f, ((kp a = b) -> KP_Cover f Mf a b).
   Proof.
     intros b p.
     exact (transport (KP_Cover f Mf a) p 1).
@@ -59,7 +59,7 @@ Section KP2_mono.
   Lemma KP_decode_coh1:
     ∀ (A B : Type) (f : A → B) (Mf : ∀ x y : A, IsEquiv (ap f)) 
       (a a0 b : A) (p : f a0 = f b),
-      transport (λ w : KP f, KP_Cover f Mf a w → kp a = w) 
+      transport (λ w : KP' f, KP_Cover f Mf a w → kp a = w) 
                 (kp_eq a0 b p) (KP_decode_fun A B f Mf a a0) =
       KP_decode_fun A B f Mf a b.
   Proof.
@@ -67,7 +67,7 @@ Section KP2_mono.
     intros x y p; cbn.
     apply path_forall; intros q.
     destruct q; cbn.
-    path_via (transport (λ w : KP f, KP_Cover f Mf a w → kp a = w) 
+    path_via (transport (λ w : KP' f, KP_Cover f Mf a w → kp a = w) 
                         (kp_eq x a (ap f ((ap f)^-1 p))) (KP_decode_fun A B f Mf a x) 1).
     refine (ap10 (transport2 _ _ _) _).
     apply ap. symmetry; apply eisretr.
@@ -78,7 +78,7 @@ Section KP2_mono.
   Lemma KP_decode_coh2:
     ∀ (A B : Type) (f : A → B) (Mf : ∀ x y : A, IsEquiv (ap f)) 
       (a a0 : A),
-      transport2 (λ w : KP f, KP_Cover f Mf a w → kp a = w) 
+      transport2 (λ w : KP' f, KP_Cover f Mf a w → kp a = w) 
                  (kp_eq2 a0) (KP_decode_fun A B f Mf a a0) =
       KP_decode_coh1 A B f Mf a a0 a0 1.
   Proof.
@@ -96,10 +96,10 @@ Section KP2_mono.
     apply whiskerR.
     rewrite !ap_V, !inv_V.
     rewrite (ap_compose ((kp_eq a a) o (ap f)) (λ x : kp a = kp a,
-      transport (λ w : KP f, KP_Cover f Mf a w → kp a = w)
+      transport (λ w : KP' f, KP_Cover f Mf a w → kp a = w)
                 x (λ p : a = a, ap kp p) 1)).
     rewrite (ap_compose ((λ x : kp a = kp a,
-      transport (λ w : KP f, KP_Cover f Mf a w → kp a = w) x
+      transport (λ w : KP' f, KP_Cover f Mf a w → kp a = w) x
         (λ p : a = a, ap kp p))) (λ f, f 1)).
     rewrite transport2_is_ap.
     rewrite !ap_V, !ap10_V, !inv_V.
@@ -110,7 +110,7 @@ Section KP2_mono.
   Qed.
   
   Definition KP_decode {A B:Type} (f:A -> B) (Mf : IsMono f) (a:A)
-    :  forall b:KP f, (KP_Cover f Mf a b -> (kp a = b)).
+    :  forall b:KP' f, (KP_Cover f Mf a b -> (kp a = b)).
   Proof.
     unfold IsMono in Mf.
     refine (KP_ind _ _ _ _).
