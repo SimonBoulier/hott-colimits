@@ -88,19 +88,20 @@ Module Cocone.
       exact (kp o kp o π2).
       exact (kp o kp o g3).
       all: intro x; unfold g1, g2, g3, f1, f2, f3; cbn.
-      all: try reflexivity.
-      refine (kp_eq _ (kp x.1) (kp x.2.1) x.2.2).
-      (* reflexivity. reflexivity. reflexivity. *)
+      exact (kp_eq _ (kp x.1) (kp x.2.1) x.2.2).
+      reflexivity. reflexivity. reflexivity.
       exact (ap kp (kp_eq _ _ _ (snd x.2.2.2))).
-      (* apply ap, kp_eq. unfold A3 in x. exact (fst x.2.2.2 @ snd x.2.2.2).  *)
-      (* apply ap, kp_eq. unfold A3 in x. exact (snd x.2.2.2).  *)
-      (* reflexivity. reflexivity. *)
-      (* all: cbn; try reflexivity. *)
-      - cbn. refine (_^ @ (concat_p1 _)^).
-        rewrite kp_eq_is_ap_kp. apply kp_eq_concat.
-      - cbn. refine (concat_1p _ @ _ @ (concat_p1 _)^).
-        apply kp_eq_is_ap_kp.
-      - cbn. exact (kp_eq2 _ @@ 1).
+      apply kp_eq; cbn. exact (fst x.2.2.2 @ snd x.2.2.2).
+      apply kp_eq; cbn. exact (snd x.2.2.2).
+      reflexivity. reflexivity.
+      all: cbn.
+      apply concat_p1.
+      refine (_ @ (kp_eq_concat _ _ _ _ _)^).
+      apply ap, kp_eq_is_ap_kp.
+      apply concat_p1.
+      refine (concat_1p _ @ kp_eq_is_ap_kp _ _ _).
+      reflexivity. reflexivity. 
+      exact (kp_eq2 _ @@ 1). reflexivity.
     Defined.
 
   End Cocone.
