@@ -16,3 +16,5 @@ https://github.com/peterlefanulumsdaine/hott-limits/
 * The file **CoEqualizer.v** we show that the HIT **Coeq** defined in the HoTT library is well a coequalizer for our definition of colimit.
 
 * The files **Auxiliary.v**, **CommutativeSquares.v**, **MyLemmas.v** and **MyTacs.v** are auxiliary files.
+
+* The files in **IteratedKernelPair** contain the formalization of the [slicing result](http://perso.eleves.ens-rennes.fr/~sboul434/documents/proof_slicing_result.pdf).
