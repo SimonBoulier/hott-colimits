@@ -27,19 +27,13 @@ Module Cocone.
     Let f1 : A3 -> A2 := λ w, (w.2.1; (w.2.2.1; snd w.2.2.2)).
     Let f2 : A3 -> A2 := λ w, (w.1; (w.2.2.1; fst w.2.2.2 @ snd w.2.2.2)).
     Let f3 : A3 -> A2 := λ w, (w.1; (w.2.1; fst w.2.2.2)).
-
-    Let g1 : A3 -> A := λ w, w.1.
-    Let g2 : A3 -> A := λ w, w.2.1.
-    Let g3 : A3 -> A := λ w, w.2.2.1.
     
     Let δ : A -> A2 := λ x, (x; (x; 1)).
 
     Let δ1 : A2 -> A3 := λ w, (w.1; (w.1; (w.2.1; (1, w.2.2)))).
     Let δ2 : A2 -> A3 := λ w, (w.1; (w.2.1; (w.2.1; (w.2.2, 1)))).
-
-    Let δ3 : A -> A3 := λ x, (x; (x; (x; (1, 1)))).
     
-    Record Cech3_cocone Z :=
+    Record cech3_cocone Z :=
       { q1 : A -> Z;
         q2 : A2 -> Z;
         q3 : A3 -> Z;
@@ -48,32 +42,20 @@ Module Cocone.
         Hf1 : q2 o f1 == q3;
         Hf2 : q2 o f2 == q3;
         Hf3 : q2 o f3 == q3;
-        Hg1 : q1 o g1 == q3;
-        Hg2 : q1 o g2 == q3;
-        Hg3 : q1 o g3 == q3;
         Hδ  : q2 o δ  == q1;
         Hδ1 : q3 o δ1 == q2;
         Hδ2 : q3 o δ2 == q2;
-        Hδ3 : q3 o δ3 == q1;
-        coh1  : forall x, Hπ1 (f2 x) @ Hf2 x = Hg1 x; (* π1 o f2 = g1 *)
-        coh2  : forall x, Hπ1 (f3 x) @ Hf3 x = Hg1 x; (* π1 o f3 = g1 *)
-        coh3  : forall x, Hπ1 (f1 x) @ Hf1 x = Hg2 x; (* π1 o f1 = g2 *)
-        coh4  : forall x, Hπ2 (f3 x) @ Hf3 x = Hg2 x; (* π2 o f3 = g2 *)
-        coh5  : forall x, Hπ2 (f1 x) @ Hf1 x = Hg3 x; (* π2 o f1 = g3 *)
-        coh6  : forall x, Hπ2 (f2 x) @ Hf2 x = Hg3 x; (* π2 o f2 = g3 *)
-        coh7  : forall x, Hπ1 (δ x) @ Hδ x = 1; (* π1 o δ = id *)
-        coh8  : forall x, Hπ2 (δ x) @ Hδ x = 1; (* π2 o δ = id *)
-        coh9  : forall x, Hδ1 (δ x) @ Hδ x = Hδ3 x; (* δ1 o δ = δ3 *)
-        coh10 : forall x, Hδ2 (δ x) @ Hδ x = Hδ3 x; (* δ2 o δ = δ3 *)
-        coh11  : forall x, Hf1 (δ1 x) @ Hδ1 x = 1; (* f1 o δ1 = id *)
-        coh12  : forall x, Hf2 (δ1 x) @ Hδ1 x
-           = ap q2 (path_sigma' _ 1 (path_sigma' _ 1 (concat_1p _))); (* f2 o δ1 = id *)
-        coh13  : forall x, Hf2 (δ2 x) @ Hδ2 x
-           = ap q2 (path_sigma' _ 1 (path_sigma' _ 1 (concat_p1 _))); (* f2 o δ2 = id *)
-        coh14  : forall x, Hf3 (δ2 x) @ Hδ2 x = 1; (* f3 o δ2 = id *)
-        coh15  : forall x, Hf3 (δ2 x) @ Hδ2 x = 1; (* f3 o δ2 = id *)
-        coh16  : forall x, Hf3 (δ2 x) @ Hδ2 x = 1; (* f3 o δ2 = id *)
-        coh17  : forall x, Hf3 (δ2 x) @ Hδ2 x = 1; (* f3 o δ2 = id *)
+        coh1  : forall x, Hπ1 (f1 x) @ Hf1 x = Hπ2 (f3 x) @ Hf3 x;
+        coh2  : forall x, Hπ1 (f2 x) @ Hf2 x = Hπ1 (f3 x) @ Hf3 x;
+        coh3  : forall x, Hπ2 (f1 x) @ Hf1 x = Hπ2 (f2 x) @ Hf2 x;
+        coh4  : forall x, Hδ1 (δ x) @ Hδ x = Hδ2 (δ x) @ Hδ x;
+        coh5  : forall x, Hπ1 (δ x) @ Hδ x = Hπ2 (δ x) @ Hδ x;
+        coh6  : forall x, Hf1 (δ1 x) @ Hδ1 x = 1;
+        coh7  : forall x, Hf2 (δ1 x) @ Hδ1 x
+                          = ap q2 (path_sigma' _ 1 (path_sigma' _ 1 (concat_1p _)));
+        coh8  : forall x, Hf2 (δ2 x) @ Hδ2 x
+                          = ap q2 (path_sigma' _ 1 (path_sigma' _ 1 (concat_p1 _)));
+        coh9  : forall x, Hf3 (δ2 x) @ Hδ2 x = 1
       }.
     
     Let f' := KP_rec B f (λ _ _ h, h) (λ _, 1). (* f' is lift(f) *)
@@ -101,59 +83,33 @@ Module Cocone.
       apply moveL_Mp. rewrite kp_eq_is_ap_kp in X'. assumption.
     Defined.
 
-    Goal Cech3_cocone (KP' f').
-      refine (Build_Cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
+    Goal cech3_cocone (KP' f').
+      refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
       exact (kp o kp).
       exact (kp o kp o π2).
-      exact (kp o kp o g3).
-      all: intro x; unfold g1, g2, g3, f1, f2, f3; cbn.
+      exact (kp o kp o π2 o f2).
+      all: intro x; unfold f1, f2, f3; cbn.
       exact (kp_eq _ (kp x.1) (kp x.2.1) x.2.2).
       reflexivity. reflexivity. reflexivity.
       exact (ap kp (kp_eq _ _ _ (snd x.2.2.2))).
-      apply kp_eq; cbn. exact (fst x.2.2.2 @ snd x.2.2.2).
-      apply kp_eq; cbn. exact (snd x.2.2.2).
-      reflexivity. reflexivity. reflexivity. reflexivity. reflexivity.
+      reflexivity. reflexivity. reflexivity.
       all: cbn; try reflexivity.
-      apply concat_p1.
-      refine (_ @ (kp_eq_concat _ _ _ _ _)^).
-      apply ap, kp_eq_is_ap_kp.
-      apply concat_p1.
-      refine (concat_1p _ @ kp_eq_is_ap_kp _ _ _).
+      refine (concat_p1 _ @ (kp_eq_is_ap_kp _ _ _)^ @ (concat_1p _)^).
+      refine (concat_p1 _ @ kp_eq_concat _ _ _ _ _ @ ap _ (kp_eq_is_ap_kp _ _ _)^).
       exact (kp_eq2 _ @@ 1).
-      rewrite (ap_compose π2 (kp o kp)). refine (ap (x:=1) (ap (kp o kp)) _).
-      unfold π2. symmetry.
+      symmetry. rewrite (ap_compose π2 (kp o kp)).
+      refine (ap (y:=1) (ap (kp o kp)) _).
       refine (ap_path_sigma_1 (P:=λ x, ∃ y, f x = f y) (λ x y, y.1)
                               _ (path_sigma' (λ y, f x.1 = f y) 1 (concat_1p (x.2).2)) @ _).
       unfold path_sigma'. pose @pr1_path_sigma. unfold pr1_path in p. apply p.
-      rewrite (ap_compose π2 (kp o kp)). refine (ap (x:=1) (ap (kp o kp)) _).
-      unfold π2. symmetry.
+      symmetry. rewrite (ap_compose π2 (kp o kp)).
+      refine (ap (y:=1) (ap (kp o kp)) _).
       refine (ap_path_sigma_1 (P:=λ x, ∃ y, f x = f y) (λ x y, y.1)
                               _ (path_sigma' (λ y, f x.1 = f y) 1 (concat_p1 (x.2).2)) @ _).
       unfold path_sigma'. pose @pr1_path_sigma. unfold pr1_path in p. apply p.
       refine (concat_p1 _ @ ap (y:=1) (ap kp) _).
       apply kp_eq2.
-    Defined.
-
-
-    Lemma pzpojf Q (q: A -> Q) (H: q o π1 == q o π2)
-          (H1: forall x, H (x; (x; 1)) = 1)
-          (H0: forall x y z (p: f x = f y) (q: f y = f z), H (_; (_; p @ q))
-                                                           = H (_; (_; p))
-                                                               @ H (_; (_; q)))
-      : Cech3_cocone Q.
-      refine (Build_Cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
-      exact q. exact (q o π2). exact (q o g3).
-      all: intro x; cbn; try reflexivity. exact (H x).
-      unfold g3.
-      (* destruct x as [x [y [z [p p']]]]. cbn. *)
-      (* exact (H (_; (_; p'))). *)
-      exact (H (_; (_; snd x.2.2.2))).
-      all: hott_simpl.
-      2: apply H1.
-      unfold f2, f3.
-      exact (H0 _ _ _ _ _)^.
-    Defined.
-    
+    Defined.    
   End Cocone.
 End Cocone.
 
