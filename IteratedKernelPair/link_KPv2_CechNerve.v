@@ -104,6 +104,26 @@ Module Cocone.
       exact (kp_eq2 _ @@ 1). reflexivity.
     Defined.
 
+
+    Lemma pzpojf Q (q: A -> Q) (H: q o π1 == q o π2)
+          (H1: forall x, H (x; (x; 1)) = 1)
+          (H0: forall x y z (p: f x = f y) (q: f y = f z), H (_; (_; p @ q))
+                                                           = H (_; (_; p))
+                                                               @ H (_; (_; q)))
+      : Cech3_cocone Q.
+      refine (Build_Cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
+      exact q. exact (q o π2). exact (q o g3).
+      all: intro x; cbn; try reflexivity. exact (H x).
+      unfold g3.
+      (* destruct x as [x [y [z [p p']]]]. cbn. *)
+      (* exact (H (_; (_; p'))). *)
+      exact (H (_; (_; snd x.2.2.2))).
+      all: hott_simpl.
+      2: apply H1.
+      unfold f2, f3.
+      exact (H0 _ _ _ _ _)^.
+    Defined.
+    
   End Cocone.
 End Cocone.
 
