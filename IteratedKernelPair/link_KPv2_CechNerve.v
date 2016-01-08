@@ -49,13 +49,16 @@ Module Cocone.
         coh2  : forall x, Hπ1 (f2 x) @ Hf2 x = Hπ1 (f3 x) @ Hf3 x;
         coh3  : forall x, Hπ2 (f1 x) @ Hf1 x = Hπ2 (f2 x) @ Hf2 x;
         coh4  : forall x, Hδ1 (δ x) @ Hδ x = Hδ2 (δ x) @ Hδ x;
-        coh5  : forall x, Hπ1 (δ x) @ Hδ x = Hπ2 (δ x) @ Hδ x;
-        coh6  : forall x, Hf1 (δ1 x) @ Hδ1 x = 1;
-        coh7  : forall x, Hf2 (δ1 x) @ Hδ1 x
+        coh5  : forall x, Hπ1 (δ x) @ Hδ x = 1;
+        coh6  : forall x, Hπ2 (δ x) @ Hδ x = 1;
+        coh7  : forall x, Hf1 (δ2 x) @ Hδ2 x = Hδ (π2 x) @ Hπ2 x;
+        coh8  : forall x, Hf3 (δ1 x) @ Hδ1 x = Hδ (π1 x) @ Hπ1 x;
+        coh9  : forall x, Hf1 (δ1 x) @ Hδ1 x = 1;
+        coh10 : forall x, Hf2 (δ1 x) @ Hδ1 x
                           = ap q2 (path_sigma' _ 1 (path_sigma' _ 1 (concat_1p _)));
-        coh8  : forall x, Hf2 (δ2 x) @ Hδ2 x
+        coh11 : forall x, Hf2 (δ2 x) @ Hδ2 x
                           = ap q2 (path_sigma' _ 1 (path_sigma' _ 1 (concat_p1 _)));
-        coh9  : forall x, Hf3 (δ2 x) @ Hδ2 x = 1
+        coh12 : forall x, Hf3 (δ2 x) @ Hδ2 x = 1
       }.
     
     Let f' := KP_rec B f (λ _ _ h, h) (λ _, 1). (* f' is lift(f) *)
@@ -84,7 +87,7 @@ Module Cocone.
     Defined.
 
     Goal cech3_cocone (KP' f').
-      refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
+      refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
       exact (kp o kp).
       exact (kp o kp o π2).
       exact (kp o kp o π2 o f2).
@@ -97,6 +100,7 @@ Module Cocone.
       refine (concat_p1 _ @ (kp_eq_is_ap_kp _ _ _)^ @ (concat_1p _)^).
       refine (concat_p1 _ @ kp_eq_concat _ _ _ _ _ @ ap _ (kp_eq_is_ap_kp _ _ _)^).
       exact (kp_eq2 _ @@ 1).
+      refine (concat_p1 _ @ kp_eq_is_ap_kp _ _ _ @ (concat_1p _)^).
       symmetry. rewrite (ap_compose π2 (kp o kp)).
       refine (ap (y:=1) (ap (kp o kp)) _).
       refine (ap_path_sigma_1 (P:=λ x, ∃ y, f x = f y) (λ x y, y.1)
