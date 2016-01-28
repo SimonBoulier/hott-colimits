@@ -1,6 +1,4 @@
-COQC = ../HoTT/hoqc
-COQDEP = ../HoTT/hoqdep
-COQTOP = ../HoTT/hoqtop
+COQC = hoqc
 
 -R . Colimits
 
