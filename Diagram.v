@@ -93,7 +93,7 @@ Section DiagramMap.
   : diagram_comp w (diagram_equiv_inv w) = diagram_idmap D2.
     destruct w as [[w_obj w_comm] is_eq_w]. simpl in *.
     set (we i := BuildEquiv (is_eq_w i)).
-    refine (path_diagram_map _ _).
+    simple refine (path_diagram_map _ _).
     exact (fun i => eisretr (we i)). simpl.
     intros i j f x. apply (concatR (concat_p1 _)^).
     apply (comm_square_inverse_is_retr (we i) (we j) _ x).
@@ -103,7 +103,7 @@ Section DiagramMap.
   : diagram_comp (diagram_equiv_inv w) w = diagram_idmap D1.
     destruct w as [[w_obj w_comm] is_eq_w]. simpl in *.
     set (we i := BuildEquiv (is_eq_w i)).
-    refine (path_diagram_map _ _).
+    simple refine (path_diagram_map _ _).
     exact (fun i => eissect (we i)). simpl.
     intros i j f x. apply (concatR (concat_p1 _)^).
     apply (comm_square_inverse_is_sect (we i) (we j) _ x).
@@ -116,12 +116,9 @@ Section DiagramMap.
     := λ D1 D2 m, Build_diagram_equiv (diagram_equiv_inv m) _.
 
   Global Instance transitive_diagram_equiv : Transitive diagram_equiv.
-    refine (λ D1 D2 D3 m1 m2, Build_diagram_equiv (diagram_comp m2 m1) _).
+    simple refine (λ D1 D2 D3 m1 m2, Build_diagram_equiv (diagram_comp m2 m1) _).
     simpl. intros i; apply isequiv_compose'. apply m1. apply m2.
   Defined.
 End DiagramMap.
 
 Notation "D1 ≃ D2" := (diagram_equiv D1 D2) (at level 10).
-
-
-(*  *)

@@ -1,4 +1,4 @@
-Require Import Basics Types MyLemmas Diagram Colimit MyTacs hit.Truncations.
+Require Import Basics Types MyLemmas Diagram Colimit MyTacs HIT.Truncations.
 
 Section TruncatedColimit.
 
@@ -16,24 +16,24 @@ Section TruncatedColimit.
 
   Definition tr_diagram : diagram G.
   Proof.
-    refine (Build_diagram _ _ _).
+    simple refine (Build_diagram _ _ _).
     - intro i; exact (Trunc m (D i)).
-    - intros i j f. cbn. refine (Trunc_rec _). intro x. exact (tr (diagram1 D f x)).
+    - intros i j f. cbn. simple refine (Trunc_rec _). intro x. exact (tr (diagram1 D f x)).
   Defined.
 
   Definition tr_cocone : cocone tr_diagram (Trunc m Q).
   Proof.
-    refine (Build_cocone _ _).
-    - intro i. refine (Trunc_rec _). intro x. apply tr.
+    simple refine (Build_cocone _ _).
+    - intro i. simple refine (Trunc_rec _). intro x. apply tr.
       exact (ColimQ i x).
-    - intros i j f. refine (Trunc_ind _ _).
+    - intros i j f. simple refine (Trunc_ind _ _).
       intro a. cbn. apply ap. exact (qq ColimQ i j f a).
   Defined.
 
   Lemma tr_cocone_to_cocone {X:TruncType m} (C: cocone tr_diagram X)
     : cocone D X.
   Proof.
-    refine (Build_cocone _ _).
+    simple refine (Build_cocone _ _).
     - intros i x. exact (C i (tr x)).
     - intros i j g x. cbn. exact (qq C i j g (tr x)).
   Defined.
@@ -41,23 +41,23 @@ Section TruncatedColimit.
   Lemma cocone_to_tr_cocone {X:TruncType m} (C: cocone D X)
     : cocone (tr_diagram) X.
   Proof.
-    refine (Build_cocone _ _).
-    - intro i. refine (Trunc_rec _). intro x.
+    simple refine (Build_cocone _ _).
+    - intro i. simple refine (Trunc_rec _). intro x.
       exact (C i x).
-    - intros i j g. refine (Trunc_ind _ _).
+    - intros i j g. simple refine (Trunc_ind _ _).
       intro a; exact (qq C i j g a).
   Defined.
 
   Lemma cocone_eq_tr_cocone {X:TruncType m}
     : cocone D X <~> cocone (tr_diagram) X.
   Proof.
-    refine (equiv_adjointify (cocone_to_tr_cocone) (tr_cocone_to_cocone) _ _).
-    - intro C. refine (path_cocone _ _).
-      intros i. refine (Trunc_ind _ _).
+    simple refine (equiv_adjointify (cocone_to_tr_cocone) (tr_cocone_to_cocone) _ _).
+    - intro C. simple refine (path_cocone _ _).
+      intros i. simple refine (Trunc_ind _ _).
       intro a. reflexivity.
-      intros i j g. refine (Trunc_ind _ _).
+      intros i j g. simple refine (Trunc_ind _ _).
       intro a. cbn. rewrite concat_1p; rewrite concat_p1. reflexivity.
-    - intro C. refine (path_cocone _ _).
+    - intro C. simple refine (path_cocone _ _).
       intros i x. reflexivity.
       intros i j g x. cbn.
       rewrite concat_1p; rewrite concat_p1. reflexivity.
@@ -77,20 +77,20 @@ Section TruncatedColimit.
   Proof.
     cbn.
     apply path_forall; intro f.
-    refine (path_cocone _ _).
-    - intros i; refine (Trunc_ind _ _).
+    simple refine (path_cocone _ _).
+    - intros i; simple refine (Trunc_ind _ _).
       intro a; reflexivity.
-    - intros i j g; refine (Trunc_ind _ _).
+    - intros i j g; simple refine (Trunc_ind _ _).
       intro a; cbn. rewrite concat_p1; rewrite concat_1p.
       rewrite ap_compose. reflexivity.
   Defined.
       
   Lemma tr_colimit : is_m_colimit m (tr_diagram) (Trunc m Q).
   Proof.
-    refine (Build_is_m_colimit _ _ _ _ tr_cocone _).
+    simple refine (Build_is_m_colimit _ _ _ _ tr_cocone _).
     intro X.
-    refine (isequiv_adjointify _ _ _).
-    - intro C. refine (Trunc_rec _).
+    simple refine (isequiv_adjointify _ _ _).
+    - intro C. simple refine (Trunc_rec _).
       apply (equiv_inv _ (IsEquiv := is_colimit_H ColimQ X) (tr_cocone_to_cocone C)).
     - intro C.
       rewrite <- compose_cocone_m_cocone; cbn.
@@ -100,7 +100,7 @@ Section TruncatedColimit.
       rewrite <- compose_cocone_m_cocone.
       pose (r := eissect _ (IsEquiv := equiv_isequiv (cocone_eq_tr_cocone (X:=X))) (postcompose_cocone ColimQ (λ x : Q, C (tr x)))); cbn in r; rewrite r; clear r.
       rewrite eissect.
-      apply path_forall; refine (Trunc_ind _ _).
+      apply path_forall; simple refine (Trunc_ind _ _).
       intro a; reflexivity.
   Defined.
   

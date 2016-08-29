@@ -46,7 +46,7 @@ Section Cocone.
 
   Definition postcompose_cocone (C: cocone D X) {Y: Type} : (X -> Y) -> cocone D Y.
     intros f.
-    refine (Build_cocone _ _).
+    simple refine (Build_cocone _ _).
     - intros i. exact (f o (C i)).
     - intros i j g x. exact (ap f (qq _ i j g x)).
   Defined.
@@ -96,7 +96,7 @@ Module Export colimit_HIT.
 
   Definition colimit_rec {G: graph} {D: diagram G} (P: Type) (C: cocone D P)
   : colimit D -> P.
-    refine (colimit_ind _ _ _).
+    simple refine (colimit_ind _ _ _).
     - exact C.
     - intros i j g x.
       exact ((transport_const (pp i j g x) (q _ _ (D _f g x))) @ (qq _ i j g x)).
@@ -107,8 +107,8 @@ Module Export colimit_HIT.
   : ap (colimit_rec P C) (pp i j g x) = qq C i j g x.
     unfold colimit_rec, colimit_ind.
     eapply (cancelL (transport_const (pp i j g x) _)).
-    refine ((apD_const (colimit_ind (λ _ : colimit D, P) C _) (pp i j g x))^ @ _).
-    refine (colimit_ind_beta_pp (λ _, P) C _ i j g x).
+    simple refine ((apD_const (colimit_ind (λ _ : colimit D, P) C _) (pp i j g x))^ @ _).
+    simple refine (colimit_ind_beta_pp (λ _, P) C _ i j g x).
   Defined.
 
   Definition cocone_colimit {G: graph} (D: diagram G) : cocone D (colimit D)
@@ -117,13 +117,13 @@ Module Export colimit_HIT.
   Lemma is_universal_colimit {G: graph} (D: diagram G)
   : is_universal (cocone_colimit D).
     intro Y; simpl.
-    refine (isequiv_adjointify (colimit_rec Y) _ _).
-    - intros C. refine (path_cocone _ _).
+    simple refine (isequiv_adjointify (colimit_rec Y) _ _).
+    - intros C. simple refine (path_cocone _ _).
       intros i x. reflexivity.
       intros i j f x. simpl. hott_simpl.
       apply colimit_rec_beta_pp.
     - intro f. apply path_forall.
-      refine (colimit_ind  _ _ _).
+      simple refine (colimit_ind  _ _ _).
       intros i x. reflexivity.
       intros i j g x. simpl.
       rewrite transport_paths_FlFr.
@@ -144,14 +144,14 @@ Section FunctorialityCocone.
   (* postcompose *)
   Definition postcompose_cocone_identity {D: diagram G} `(C: cocone D X)
   : postcompose_cocone C idmap = C.
-    refine (path_cocone _ _).
+    simple refine (path_cocone _ _).
     intros i x; reflexivity.
     intros i j g x; simpl; hott_simpl.
   Defined.
 
   Definition postcompose_cocone_comp  {D: diagram G} `(f: X -> Y) `(g: Y -> Z) (C: cocone D X)
   : postcompose_cocone C (g o f) = postcompose_cocone (postcompose_cocone C f) g.
-    refine (path_cocone _ _).
+    simple refine (path_cocone _ _).
     intros i x; reflexivity.
     intros i j h x; simpl; hott_simpl. apply ap_compose.
   Defined.
@@ -159,7 +159,7 @@ Section FunctorialityCocone.
   (* precompose *)
   Definition precompose_cocone {D1 D2: diagram G} (m: diagram_map D1 D2) {X: Type}
   : (cocone D2 X) -> (cocone D1 X).
-    intros C. refine (Build_cocone _ _).
+    intros C. simple refine (Build_cocone _ _).
     intros i x. exact (C i (m i x)).
     intros i j g x; simpl.
     etransitivity. apply ap. symmetry. apply diagram_map_comm. apply qq.
@@ -167,14 +167,14 @@ Section FunctorialityCocone.
 
   Definition precompose_cocone_identity (D: diagram G) (X: Type)
   : precompose_cocone (X:=X) (diagram_idmap D) == idmap.
-    intros C; simpl. refine (path_cocone _ _).
+    intros C; simpl. simple refine (path_cocone _ _).
     intros i x. reflexivity. intros; simpl. hott_simpl.
   Defined.
 
   Definition precompose_cocone_comp {D1 D2 D3: diagram G} (m2: diagram_map D2 D3) (m1: diagram_map D1 D2) (X: Type):
      (precompose_cocone (X:=X) m1) o (precompose_cocone m2) == precompose_cocone (diagram_comp m2 m1).
     intro C; simpl.
-    refine (path_cocone _ _).
+    simple refine (path_cocone _ _).
     intros i x. reflexivity.
     intros i j g x. simpl. hott_simpl.
     apply ap10. apply ap. unfold CommutativeSquares.comm_square_comp.
@@ -184,7 +184,7 @@ Section FunctorialityCocone.
   (* precompose and postcompose *)
   Definition precompose_postcompose_cocone {D1 D2: diagram G} (m: diagram_map D1 D2) `(f: X -> Y) (C: cocone D2 X)
   : postcompose_cocone (precompose_cocone m C) f = precompose_cocone m (postcompose_cocone C f).
-    refine (path_cocone _ _).
+    simple refine (path_cocone _ _).
     - intros i x; reflexivity.
     - intros i j g x; simpl; hott_simpl.
       etransitivity. apply ap_pp. apply ap10. apply ap.
@@ -194,7 +194,7 @@ Section FunctorialityCocone.
   (* compose with equivalences *)
   Definition precompose_cocone_equiv {D1 D2: diagram G} (m: D1 ≃ D2) (X: Type)
   : IsEquiv (precompose_cocone (X:=X) m).
-    refine (isequiv_adjointify (precompose_cocone (diagram_equiv_inv m)) _ _).
+    simple refine (isequiv_adjointify (precompose_cocone (diagram_equiv_inv m)) _ _).
     - intros C. etransitivity. apply precompose_cocone_comp.
       rewrite diagram_inv_is_retraction. apply precompose_cocone_identity.
     - intros C. etransitivity. apply precompose_cocone_comp.
@@ -203,7 +203,7 @@ Section FunctorialityCocone.
 
   Definition postcompose_cocone_equiv {D: diagram G} `(f: X <~> Y)
   : IsEquiv (λ C: cocone D X, postcompose_cocone C f).
-    refine (isequiv_adjointify _ _ _).
+    simple refine (isequiv_adjointify _ _ _).
     - exact (λ C, postcompose_cocone C f^-1).
     - intros C. etransitivity. symmetry. apply postcompose_cocone_comp.
       etransitivity. 2:apply postcompose_cocone_identity. apply ap.
@@ -219,7 +219,7 @@ Section FunctorialityCocone.
     unfold is_universal.
     intros H Y.
     rewrite (path_forall (λ f, precompose_postcompose_cocone m f C)).
-    refine isequiv_compose. apply precompose_cocone_equiv.
+    simple refine isequiv_compose. apply precompose_cocone_equiv.
   Defined.
 
   Definition postcompose_equiv_universality {D: diagram G} `(f: X <~> Y) `(C: cocone D X)
@@ -227,18 +227,18 @@ Section FunctorialityCocone.
     unfold is_universal.
     intros H Z.
     rewrite <- (path_forall (λ g, postcompose_cocone_comp f g C)).
-    refine isequiv_compose.
+    simple refine isequiv_compose.
   Defined.
 
   Definition precompose_equiv_is_colimit {D1 D2: diagram G} (m: D1 ≃ D2) {Q: Type}
   : is_colimit D2 Q -> is_colimit D1 Q.
-    intros HQ. refine (Build_is_colimit (precompose_cocone m HQ) _).
+    intros HQ. simple refine (Build_is_colimit (precompose_cocone m HQ) _).
     apply precompose_equiv_universality. apply HQ.
   Defined.
 
   Definition postcompose_equiv_is_colimit {D: diagram G} `(f: Q <~> Q')
   : is_colimit D Q -> is_colimit D Q'.
-    intros HQ. refine (Build_is_colimit (postcompose_cocone HQ f) _).
+    intros HQ. simple refine (Build_is_colimit (postcompose_cocone HQ f) _).
     apply postcompose_equiv_universality. apply HQ.
   Defined.
 End FunctorialityCocone.
@@ -265,7 +265,7 @@ Section FunctorialityColimit.
   Definition functoriality_colimit_eissect
   : Sect (functoriality_colimit (diagram_equiv_inv m) HQ2 HQ1) (functoriality_colimit m HQ1 HQ2).
     unfold functoriality_colimit.  apply ap10.
-    refine (equiv_inj (postcompose_cocone HQ2) _). apply HQ2.
+    simple refine (equiv_inj (postcompose_cocone HQ2) _). apply HQ2.
     etransitivity. 2:symmetry; apply postcompose_cocone_identity.
     etransitivity. apply postcompose_cocone_comp.
     unfold postcompose_cocone_inv. rewrite eisretr.
@@ -277,7 +277,7 @@ Section FunctorialityColimit.
   Definition functoriality_colimit_eisretr
   : Sect (functoriality_colimit m HQ1 HQ2) (functoriality_colimit (diagram_equiv_inv m) HQ2 HQ1).
     unfold functoriality_colimit.  apply ap10.
-    refine (equiv_inj (postcompose_cocone HQ1) _). apply HQ1.
+    simple refine (equiv_inj (postcompose_cocone HQ1) _). apply HQ1.
     etransitivity. 2:symmetry; apply postcompose_cocone_identity.
     etransitivity. apply postcompose_cocone_comp.
     unfold postcompose_cocone_inv. rewrite eisretr.
@@ -299,8 +299,8 @@ End FunctorialityColimit.
 Section ColimitUnicity.
   Lemma colimit_unicity {G: graph} {D: diagram G} {Q1 Q2: Type} (HQ1: is_colimit D Q1) (HQ2: is_colimit D Q2)
   : Q1 <~> Q2.
-    refine (functoriality_colimit_equiv _ HQ1 HQ2).
-    refine (Build_diagram_equiv (diagram_idmap D) _).
+    simple refine (functoriality_colimit_equiv _ HQ1 HQ2).
+    simple refine (Build_diagram_equiv (diagram_idmap D) _).
   Defined.
 End ColimitUnicity.
 

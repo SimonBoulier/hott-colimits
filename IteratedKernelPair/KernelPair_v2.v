@@ -45,7 +45,7 @@ Module Export KP.
              (kp_eq2': forall a, kp_eq' a a 1 = 1)
     : KP' f -> P.
   Proof.
-    refine (KP_ind _ kp' (fun a b p => transport_const _ _ @ kp_eq' a b p)  _).
+    simple refine (KP_ind _ kp' (fun a b p => transport_const _ _ @ kp_eq' a b p)  _).
     intro a.
     exact ((whiskerL (transport2 (λ _ : KP' f, P) (kp_eq2 a) (kp' a)) (kp_eq2' a) @ concat_p1 _)^
            @ (whiskerR (transport2_const (A:=KP' f) (B:= P) (kp_eq2 a) (kp' a) @ concat_p1 _)^ (kp_eq' a a 1))).
@@ -77,11 +77,11 @@ Module Export KP.
                               ((concat_p1 (H1 x)) @ (concat_1p (H1 x))^) )
     : F == G.
   Proof.
-    refine (KP_ind _ _ _ _).
+    simple refine (KP_ind _ _ _ _).
     - exact H1.
     - intros x y p. etransitivity.
       rapply @transport_paths_FlFr.
-      refine (concat_pp_p @ _).
+      simple refine (concat_pp_p @ _).
       apply moveR_Vp. by symmetry.
     - admit.
   Defined.
@@ -99,14 +99,14 @@ Definition KP_equiv_fun `{ua: Univalence} {A B C:Type}
            (e: g o α = f)
   : KP' f -> KP' g.
 Proof.
-  refine (KP_rec _ _ _ _).
+  simple refine (KP_rec _ _ _ _).
   intro a; apply kp. exact (α a).
   intros a b p; cbn.
   apply kp_eq. exact (ap10 e a @ p @ (ap10 e b)^).
   intro a; cbn.
   path_via (kp_eq (f:=g) (α a) (α a) 1).
   apply ap.
-  refine ((concat_p1 _ @@ 1) @ _).
+  simple refine ((concat_p1 _ @@ 1) @ _).
   apply concat_pV.
   apply kp_eq2.
 Defined.
@@ -123,14 +123,14 @@ Proof.
   assert ((KP_rec (KP' g) (λ a : A, kp a)
         (λ (a b : A) (p : g a = g b), kp_eq a b ((1 @ p) @ 1))
         (λ a : A, 1 @ kp_eq2 a)) == idmap).
-  { refine (KP_eta _ _ _ _ _).
+  { simple refine (KP_eta _ _ _ _ _).
     intro; reflexivity.
     intros a b p; cbn.
-    refine (concat_1p _ @ _ @ (concat_p1 _)^).
-    refine (_ @ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^).
-    refine (ap_idmap _ @ _).
+    simple refine (concat_1p _ @ _ @ (concat_p1 _)^).
+    simple refine (_ @ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^).
+    simple refine (ap_idmap _ @ _).
     apply ap.
-    refine (_ @ (concat_p1 _)^). exact (concat_1p _)^.
+    simple refine (_ @ (concat_p1 _)^). exact (concat_1p _)^.
     intro a; cbn.
     rewrite transport_paths_FlFr. cbn.
     rewrite ap_V. rewrite inv_V.
@@ -170,7 +170,7 @@ Proof.
     rewrite KP_rec_beta_kp_eq2.
     rewrite ap_idmap. rewrite (concat_1p (kp_eq2 a)).
     rewrite inv_pp.  reflexivity. }
-  refine (isequiv_homotopic idmap  _).
+  simple refine (isequiv_homotopic idmap  _).
   exact (λ x, (X x)^).
 Defined.
 
@@ -190,7 +190,7 @@ Proof.
     apply ap.
     cbn. rewrite transport_paths_Fl. apply moveL_Vp.
     rewrite inv_V. reflexivity. }
-  refine (isequiv_homotopic _ (λ x, ap10 X^ x)).
+  simple refine (isequiv_homotopic _ (λ x, ap10 X^ x)).
   exact (isequiv_KP_equiv_fun_path f g ((path_universe_uncurried α)) (ap (λ (u : A → C) (x : A), g (u x))
                                                                        (ap (equiv_fun (B:=C)) (equiv_path_path_universe_uncurried α)) @ e)).
 Qed.  
@@ -209,7 +209,7 @@ Section T.
   
   Definition functoriality_T `(f: X -> Y) : T X -> T Y.
   Proof.
-    refine (KP_rec _ (α o f) _ _).
+    simple refine (KP_rec _ (α o f) _ _).
     - intros a b p; apply β. exact ((1 @ p) @ 1).
     - intros a; exact (1 @ Ɣ (f a)). 
   Defined.
@@ -229,7 +229,7 @@ Section KP_Sigma.
   Proof.
     transparent assert (F : ((∃ y : Y, KP' (λ _ : A y, tt)) -> KP' (λ x : ∃ y : Y, A y, pr1 x))).
   { intros [y a].
-    refine (KP_rec _ _ _ _ a).
+    simple refine (KP_rec _ _ _ _ a).
     intro x. apply kp.
     exists y.
     exact x.
@@ -239,13 +239,13 @@ Section KP_Sigma.
     match goal with |[|- @kp_eq _ _ ?ff ?aa ?bb _ = _] => exact (kp_eq2 (f:=ff) aa)  end. }
 
   transparent assert (G: (KP' (λ x : ∃ y : Y, A y, pr1 x) -> (∃ y : Y, KP' (λ _ : A y, tt)))).
-  { refine (KP_rec _ _ _ _).
+  { simple refine (KP_rec _ _ _ _).
     intros x. exists x.1. apply kp. exact x.2.
     intros a b p. cbn.
-    refine (path_sigma' _ _ _).
+    simple refine (path_sigma' _ _ _).
     exact p.
     cbn.
-    refine (transport_KP (f:=(λ y a, tt)) p (pr2 a) @ _).
+    simple refine (transport_KP (f:=(λ y a, tt)) p (pr2 a) @ _).
     apply kp_eq. apply path_ishprop.
     intro a; cbn.
     match goal with
@@ -253,29 +253,29 @@ Section KP_Sigma.
     end.
     apply ap.
     
-    refine (concat_1p _ @ _).
+    simple refine (concat_1p _ @ _).
     cbn.
     match goal with
     |[|- kp_eq _ _ ?pp = _] => assert (r: 1 = pp) by apply path_ishprop
     end.
     destruct r. 
     match goal with |[|- @kp_eq _ _ ?ff ?aa ?bb _ = _] => exact (kp_eq2 (f:=ff) aa) end. }
-  refine (equiv_adjointify G F _ _).
+  simple refine (equiv_adjointify G F _ _).
   - intros [y x]. revert x.
     unfold F; clear F; unfold G; clear G.
-    refine (KP_eta _ _ _ _ _).
+    simple refine (KP_eta _ _ _ _ _).
     intro x; reflexivity.
     intros a b p; cbn.
-    refine (concat_1p _ @ _ @ (concat_p1 _)^).
+    simple refine (concat_1p _ @ _ @ (concat_p1 _)^).
     match goal with
     |[|- _ = ap (λ x, ?gg (?ff x)) ?pp] =>
-     refine (_ @ (ap_compose ff gg pp)^)
+     simple refine (_ @ (ap_compose ff gg pp)^)
     end.
-    refine (_ @ (ap02 _ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^)).
-    refine (_ @ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^).
+    simple refine (ap_existT _ _ _ _ _ @ _).
+    simple refine (_ @ (ap02 _ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^)).
+    simple refine (_ @ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^).
     cbn.
-    refine (ap_existT _ _ _ _ _ @ _).
-    apply ap. symmetry; refine (concat_1p _ @ _).
+    apply ap. symmetry; simple refine (concat_1p _ @ _).
     apply ap; apply path_ishprop.
 
     intro a; cbn. rewrite transport_paths_FlFr.
@@ -348,14 +348,14 @@ Section KP_Sigma.
     cbn in r; rewrite <- r; clear r; unfold p; clear p.
     rewrite transport_paths_FlFr.
     rewrite concat_p1. rewrite ap_V. rewrite inv_V. rewrite ap_V. reflexivity.
-  - refine (KP_eta _ _ _ _ _).
+  - simple refine (KP_eta _ _ _ _ _).
     intro x. reflexivity.
     intros [a x] [b y] p; cbn.
-    refine (concat_1p _ @ (ap_idmap _) @ _ @ (concat_p1 _)^).
+    simple refine (concat_1p _ @ (ap_idmap _) @ _ @ (concat_p1 _)^).
 
-    refine (_ @ (ap_compose G F (kp_eq (a;x) (b;y) p))^).
+    simple refine (_ @ (ap_compose G F (kp_eq (a;x) (b;y) p))^).
     unfold G.
-    refine (_ @ (ap02 F (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^)).
+    simple refine (_ @ (ap02 F (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^)).
     cbn in *.
     destruct p. cbn. unfold F; clear F.
     pose (F := λ x:Y, λ x':KP' (λ _ : A x, tt),
@@ -365,10 +365,11 @@ Section KP_Sigma.
                                 kp_eq (x; u) (x; v) (idpath x))
                                (λ u : A (x), kp_eq2 (x; u)) 
                                x').
-    refine (_ @ (ap_path_sigma_1 F a (1 @ kp_eq x y (path_ishprop tt tt)))^).
-    refine (_ @ (ap_pp _ _ _)^). cbn.
-    refine (_ @ (concat_1p _)^).
-    refine (_ @ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^). reflexivity.
+    simple refine (_ @ (ap_path_sigma_1 F a (1 @ kp_eq x y (path_ishprop tt tt)))^).
+    simple refine ((KP_rec_beta_kp_eq _ _ _ _ _ _ _)^ @ _).
+    exact (path_ishprop tt tt).
+    simple refine (_ @ (ap_pp _ _ _)^). cbn.
+    simple refine (concat_1p _)^.
 
     intros [a x]; cbn.
     match goal with |[|- ?XX = _] => set (X := XX) end.
@@ -425,9 +426,8 @@ Section KP_Sigma.
     assert (r: 1 = (path_ishprop tt tt)) by apply path_ishprop.
     destruct r.
     match goal with
-    |[|- (((((( 1 @ ?P) @ ?Q) @ _) @_)@_)@_)@ _ = _] =>
-     rewrite (concat_1p P);
-       rewrite (concat_p1 (P @ Q))
+    |[|- (((((( 1 @ ?P) @ ?Q) @ _) @ _)@ _)@ _) = _] =>
+     rewrite (concat_1p P)
     end.
 
     pose (p :=apD (λ U, ap_idmap U) (kp_eq2 (f:=(λ x : ∃ y : Y, A y, pr1 x)) (a;x))^). cbn in p.
@@ -508,11 +508,11 @@ Defined.
 
   Lemma KP_slicing_fun : KP' f -> {y: B & T (hfiber f y)}.
   Proof.
-    refine (KP_rec _ _ _ _).
+    simple refine (KP_rec _ _ _ _).
     - intro a. exact (f a ; (kp (a; 1))).
     - intros a b p; cbn.
-      refine (path_sigma' _ p _).
-      etransitivity. refine (transport_KP _ _).
+      simple refine (path_sigma' _ p _).
+      etransitivity. simple refine (transport_KP _ _).
         by apply kp_eq.
     - intros a; cbn. exact (ap _ (ap _ (kp_eq2 _))).
   Defined.
@@ -521,8 +521,8 @@ Defined.
     : KP' f <~> {y:B & KP' (λ _:hfiber f y, tt)}.
   Proof.
     etransitivity; [idtac | exact (KP_pr1_to_sigma B (hfiber f))].
-    refine (BuildEquiv (isequiv_KP_equiv_fun _ _ _ _)).
-    refine (equiv_adjointify _ _ _ _).
+    simple refine (BuildEquiv (isequiv_KP_equiv_fun _ _ _ _)).
+    simple refine (equiv_adjointify _ _ _ _).
     intro x; exact (f x; (x;1)).
     intros [y [x p]]. exact x.
     intros [y [x p]].
@@ -533,21 +533,21 @@ Defined.
 
   Lemma KP_slicing_isequiv `{ua: Univalence} : IsEquiv KP_slicing_fun.
   Proof.
-    refine (isequiv_homotopic (T_to_sigmahfiber) (H := equiv_isequiv (T_to_sigmahfiber)) _).
+    simple refine (isequiv_homotopic (T_to_sigmahfiber) (H := equiv_isequiv (T_to_sigmahfiber)) _).
     intro x; cbn. unfold KP_slicing_fun.
   revert x.
-  refine (KP_eta _ _ _ _ _).
+  simple refine (KP_eta _ _ _ _ _).
   - intro; reflexivity.
   - intros a b p; cbn.
-    refine (concat_1p _ @ _ @ (concat_p1 _)^).
+    simple refine (concat_1p _ @ _ @ (concat_p1 _)^).
     unfold KP_equiv_fun.
     match goal with
     |[|- _ = ap (λ x, ?gg (?ff x)) ?pp ] =>
-     refine (_ @ (ap_compose ff gg pp)^);
-       refine (_ @ (ap02 gg (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^))
+     simple refine (_ @ (ap_compose ff gg pp)^);
+       simple refine (_ @ (ap02 gg (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^))
     end.
-    refine (_ @ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^).    
-    refine ((KP_rec_beta_kp_eq _ _ _ _ a b p) @ _).
+    simple refine (_ @ (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^).    
+    simple refine ((KP_rec_beta_kp_eq _ _ _ _ a b p) @ _).
     cbn.
     etransitivity.
     2: exact (apD (λ U, path_sigma' (λ y : B, KP' (λ _ : hfiber f y, tt)) 
@@ -555,7 +555,7 @@ Defined.
                                     (transport_KP U (a; 1) @
                                                  kp_eq (transport (λ y : B, hfiber f y) U (a; 1)) 
                                                  (b; 1) (path_ishprop tt tt))) (concat_p1 (1 @ p) @ (concat_1p p))^).
-    refine (_ @ (transport_const _ _)^).
+    simple refine (_ @ (transport_const _ _)^).
     apply ap.
     apply ap. apply ap. apply path_ishprop.
   - intro a; cbn.
@@ -654,21 +654,21 @@ Defined.
   
   Definition KP_lift : KP' f -> B.
   Proof.
-    refine (KP_rec _ f _ _); intros; try reflexivity.
+    simple refine (KP_rec _ f _ _); intros; try reflexivity.
   Defined.
   
   Definition KP_lift_slicing `{ua : Univalence} : KP_lift == pr1 o KP_slicing.
   Proof.
-    refine (KP_eta _ _ _ _ _).
+    simple refine (KP_eta _ _ _ _ _).
     - intro; reflexivity.
     - intros x y p. cbn.
-      refine (concat_1p _ @ _ @ (concat_p1 _)^).
+      simple refine (concat_1p _ @ _ @ (concat_p1 _)^).
       unfold KP_slicing, KP_slicing_fun; cbn.
       unfold KP_lift.
       symmetry.
-      refine (KP_rec_beta_kp_eq _ _ _ _ _ _ _ @ _).
-      refine (_ @ (ap_compose KP_slicing pr1 (kp_eq _ _ p))^).
-      refine (_ @ (ap (ap pr1) _)).
+      simple refine (KP_rec_beta_kp_eq _ _ _ _ _ _ _ @ _).
+      simple refine (_ @ (ap_compose KP_slicing pr1 (kp_eq _ _ p))^).
+      simple refine (_ @ (ap (ap pr1) _)).
       3: exact (KP_rec_beta_kp_eq _ _ _ _ _ _ _)^.
       exact (pr1_path_sigma _ _)^.
     - intro a. cbn beta.
@@ -703,7 +703,7 @@ Defined.
       repeat rewrite concat_1p. repeat rewrite concat_p1.
       repeat rewrite inv_pp. repeat rewrite inv_V.
       repeat rewrite concat_p_pp.
-      refine (_ @ concat_1p _). apply whiskerR.
+      simple refine (_ @ concat_1p _). apply whiskerR.
       cbn.
       unfold transport_KP.
       match goal with
@@ -714,10 +714,6 @@ Defined.
       rewrite transport_paths_Fl.
       Transparent pr1_path_sigma. cbn.
       rewrite concat_p1. rewrite ap_V. rewrite inv_V.
-      match goal with
-      |[|- ((((_ @ ?P1) @ ?P2) @ ?P3) @ ?P4) @ ?P5 = _]
-       => rewrite (concat_1p P1)
-      end.
       rewrite concat_pV_p. rewrite ap02_pp. rewrite inv_pp.
       rewrite concat_pV_p.
       apply moveR_Vp. rewrite <- (ap_compose (concat 1) (path_sigma' (λ y : B, KP' (λ _ : hfiber f y, tt)) 1) (kp_eq2 (a; 1))); cbn.
@@ -731,18 +727,18 @@ Defined.
   
   Definition KP_lift_hfiber `{ua: Univalence} (y: B) : hfiber KP_lift y <~> T (hfiber f y).
   Proof.
-    etransitivity. refine (equiv_functor_sigma' KP_slicing _).
+    etransitivity. simple refine (equiv_functor_sigma' KP_slicing _).
     exact (λ x, KP_lift (KP_slicing^-1 x) = y).
-    intros a. refine (equiv_paths _). f_ap.
+    intros a. simple refine (equiv_paths _). f_ap.
     exact (eissect KP_slicing a)^.
-    etransitivity. refine (equiv_functor_sigma_id _).
+    etransitivity. simple refine (equiv_functor_sigma_id _).
     exact (λ x, x.1 = y).
-    intros w. refine (equiv_paths _).
+    intros w. simple refine (equiv_paths _).
     etransitivity. exact (KP_lift_slicing _).
     apply ap. apply eisretr.
-    { refine (equiv_adjointify _ _ _ _).
-      - intros w. refine (w.2 # w.1.2).
-      - intros w. refine (exist _ _ _). exists y. exact w. reflexivity.
+    { simple refine (equiv_adjointify _ _ _ _).
+      - intros w. simple refine (w.2 # w.1.2).
+      - intros w. simple refine (exist _ _ _). exists y. exact w. reflexivity.
       - intros w. reflexivity.
       - intros [w e]. destruct e. reflexivity. }
   Defined.
@@ -753,7 +749,7 @@ Section KP_lift_equiv.
   Definition hfiber_KP_lift_equiv `{ua: Univalence} `(f: X -> Y) {A: Type} (y: Y) (e: (hfiber f y) <~>  A)
   : {e': hfiber (KP_lift f) y <~> T A & α o e == e' o (λ x: hfiber f y, (kp x.1; x.2))}.
   Proof.
-    refine (exist _ _ _).
+    simple refine (exist _ _ _).
     - etransitivity.
       rapply @KP_lift_hfiber.
       exact (functoriality_equiv_T e).

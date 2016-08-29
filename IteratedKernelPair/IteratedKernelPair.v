@@ -23,26 +23,26 @@ Section CechNerve.
     induction n.
     - exists X. exact f.
     - exists (KP IHn.2).
-      first [apply KP_lift | refine (KP_lift _ (KP_colimit _))].
+      first [apply KP_lift | simple refine (KP_lift _ (KP_colimit _))].
   Defined.
 
   Let fn := λ n, (CechNerve_aux n).2. 
 
   Definition CechNerve : diagram mappingtelescope_graph.
-    refine (Build_diagram _ _ _).
+    simple refine (Build_diagram _ _ _).
     - intros n. exact (CechNerve_aux n).1.
     - intros n m q; destruct q; simpl. apply kp.
   Defined.
   
   Definition SlicedCechNerve1 (y: Y) : diagram mappingtelescope_graph.
-    refine (Build_diagram _ _ _).
+    simple refine (Build_diagram _ _ _).
     - intros n. exact (hfiber (fn n) y).
     - intros n m q x; destruct q; simpl in *.
       exists (kp x.1). exact x.2.
   Defined.
 
   Definition SlicedCechNerve_equiv1 : CechNerve ≃ (sigma_diag SlicedCechNerve1).
-    refine (Build_diagram_equiv (Build_diagram_map _ _) _).
+    simple refine (Build_diagram_equiv (Build_diagram_map _ _) _).
     - intros n; simpl. apply equiv_fibration_replacement.
     - intros n m q; destruct q; simpl in *.
       exact (fibration_replacement_commute kp (fn n) (fn n.+1) (λ _,1)).
@@ -50,23 +50,23 @@ Section CechNerve.
   Defined.
   
   Let auxT (y: Y) (n: nat) : Type   (* := T^n (hfiber f y) *)
-    := (nat_rec Type (hfiber f y) (λ _ X, T X) n).
+    := (nat_rect (fun _ => Type) (hfiber f y) (λ _ X, T X) n).
 
   Definition SlicedCechNerve2 (y: Y) : diagram mappingtelescope_graph.
-    refine (Build_diagram _ _ _).
+    simple refine (Build_diagram _ _ _).
     - intros n; exact (auxT y n).
     - intros i j q; destruct q; simpl. apply α.
   Defined.
 
   Definition SlicedCechNerve_equiv2 `{ua : Univalence} (y: Y) : (SlicedCechNerve1 y) ≃ (SlicedCechNerve2 y).
-    refine (equiv_mappingtelescope_diag _ _ _ _); simpl.
+    simple refine (equiv_mappingtelescope_diag _ _ _ _); simpl.
     apply reflexive_equiv.
-    intros n e. refine (hfiber_KP_lift_equiv _ _ _).
+    intros n e. simple refine (hfiber_KP_lift_equiv _ _ _).
   Defined.
 
   Definition SlicedCechNerve_equiv `{ua : Univalence} : CechNerve ≃ (sigma_diag SlicedCechNerve2).
     etransitivity. apply SlicedCechNerve_equiv1.
-    refine (sigma_diag_functor_equiv _ _ _).
+    simple refine (sigma_diag_functor_equiv _ _ _).
     apply SlicedCechNerve_equiv2.
   Defined.
 End CechNerve.

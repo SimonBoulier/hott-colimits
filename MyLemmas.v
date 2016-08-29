@@ -37,15 +37,15 @@ Lemma path_sig_hfiber `{f: A -> B} (x y : sig (hfiber f)) (q : x.2.1 = y.2.1) : 
   destruct x as [b [a e]].
   destruct y as [b' [a' e']].
   simpl in q.
-  refine (path_sigma' _ _ _). exact (e^ @ (ap f q) @ e').
+  simple refine (path_sigma' _ _ _). exact (e^ @ (ap f q) @ e').
   etransitivity. exact (transport_sigma _ _). simpl.
-  refine (path_sigma' _ _ _).
+  simple refine (path_sigma' _ _ _).
   etransitivity. apply transport_const. exact q.
   path_induction. reflexivity.
 Defined.
 
 Lemma equiv_paths {A: Type} {a a' b: A} (p: a = a') : a = b <~> a' = b.
-  refine (equiv_adjointify (concat p^) (concat p) _ _); intro; abstract hott_simpl.
+  simple refine (equiv_adjointify (concat p^) (concat p) _ _); intro; abstract hott_simpl.
 Defined.
   
 Definition transport_hfiber `(f: A -> B) `(e: b = b') `(p: f a = b)
@@ -62,7 +62,7 @@ Definition functor_fibration_replacement `{f: X -> Y} `{f': X' -> Y} (g: X -> X'
 Definition fibration_replacement_commute `(g: X -> X') `(f: X -> Y) (f': X' -> Y) (e: f' o g == f)
 : (functor_fibration_replacement g e) o (equiv_fibration_replacement f) == (equiv_fibration_replacement f') o g.
   intros x; simpl.
-  refine (path_sig_hfiber (f:=f') _ _ _). reflexivity.
+  simple refine (path_sig_hfiber (f:=f') _ _ _). reflexivity.
 Defined.
 
 
@@ -80,7 +80,7 @@ Lemma ap_ap_path_forall `{HF:Funext} {X:Type} {Y:X -> Type} (g h:forall x:X, Y x
      (path_forall g h eq)
   = eq x.
   apply (apD10 (f := ((ap (x:=g) (y:=h) (λ f : ∀ x0 : X, Y x0, f x)) o apD10^-1)) (g:= λ eq, eq x)).
-  refine (moveR_E_compose _ _).
+  simple refine (moveR_E_compose _ _).
   simpl. apply path_forall; intro u.
   destruct u; reflexivity.
 Qed.
