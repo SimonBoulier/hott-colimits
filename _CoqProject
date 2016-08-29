@@ -1,4 +1,4 @@
-COQC = hoqc
+COQC = ~/Dépôts/HoTT/hoqc
 
 -R . Colimits
 
@@ -21,4 +21,4 @@ IteratedKernelPair/IteratedKernelPair.v
 IteratedKernelPair/KPv2_mono.v
 IteratedKernelPair/link_KPv2_CechNerve.v
 
-Colimits
+Colimits.v

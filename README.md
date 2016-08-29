@@ -1,3 +1,4 @@
+
 # hott-colimits
 
 Formalization of properties of colimits in HoTT.
@@ -18,3 +19,14 @@ https://github.com/peterlefanulumsdaine/hott-limits/
 * The files **Auxiliary.v**, **CommutativeSquares.v**, **MyLemmas.v** and **MyTacs.v** are auxiliary files.
 
 * The files in **IteratedKernelPair** contain the formalization of the [slicing result](http://perso.eleves.ens-rennes.fr/~sboul434/documents/proof_slicing_result.pdf).
+
+
+# Compilation
+
+You need coq 8.5 and the HoTT library.
+You have to precise the location of your `hoqc` in the files _CoqProject and .dir-locals.el (only for Proof General).
+Then run:
+     coq_makefile -f _CoqProject -o Makefile
+     make
+
+The compilation takes several minutes on my laptop.

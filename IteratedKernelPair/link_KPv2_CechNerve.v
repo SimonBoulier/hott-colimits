@@ -87,7 +87,7 @@ Module Cocone.
     Defined.
 
     Goal cech3_cocone (KP' f').
-      refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
+      simple refine (Build_cech3_cocone _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
       exact (kp o kp).
       exact (kp o kp o π2).
       exact (kp o kp o π2 o f2).
@@ -97,21 +97,21 @@ Module Cocone.
       exact (ap kp (kp_eq _ _ _ (snd x.2.2.2))).
       reflexivity. reflexivity. reflexivity.
       all: cbn; try reflexivity.
-      refine (concat_p1 _ @ (kp_eq_is_ap_kp _ _ _)^ @ (concat_1p _)^).
-      refine (concat_p1 _ @ kp_eq_concat _ _ _ _ _ @ ap _ (kp_eq_is_ap_kp _ _ _)^).
+      simple refine (concat_p1 _ @ (kp_eq_is_ap_kp _ _ _)^ @ (concat_1p _)^).
+      simple refine (concat_p1 _ @ kp_eq_concat _ _ _ _ _ @ ap _ (kp_eq_is_ap_kp _ _ _)^).
       exact (kp_eq2 _ @@ 1).
-      refine (concat_p1 _ @ kp_eq_is_ap_kp _ _ _ @ (concat_1p _)^).
+      simple refine (concat_p1 _ @ kp_eq_is_ap_kp _ _ _ @ (concat_1p _)^).
       symmetry. rewrite (ap_compose π2 (kp o kp)).
-      refine (ap (y:=1) (ap (kp o kp)) _).
-      refine (ap_path_sigma_1 (P:=λ x, ∃ y, f x = f y) (λ x y, y.1)
+      simple refine (ap (y:=1) (ap (kp o kp)) _).
+      simple refine (ap_path_sigma_1 (P:=λ x, ∃ y, f x = f y) (λ x y, y.1)
                               _ (path_sigma' (λ y, f x.1 = f y) 1 (concat_1p (x.2).2)) @ _).
       unfold path_sigma'. pose @pr1_path_sigma. unfold pr1_path in p. apply p.
       symmetry. rewrite (ap_compose π2 (kp o kp)).
-      refine (ap (y:=1) (ap (kp o kp)) _).
-      refine (ap_path_sigma_1 (P:=λ x, ∃ y, f x = f y) (λ x y, y.1)
+      simple refine (ap (y:=1) (ap (kp o kp)) _).
+      simple refine (ap_path_sigma_1 (P:=λ x, ∃ y, f x = f y) (λ x y, y.1)
                               _ (path_sigma' (λ y, f x.1 = f y) 1 (concat_p1 (x.2).2)) @ _).
       unfold path_sigma'. pose @pr1_path_sigma. unfold pr1_path in p. apply p.
-      refine (concat_p1 _ @ ap (y:=1) (ap kp) _).
+      simple refine (concat_p1 _ @ ap (y:=1) (ap kp) _).
       apply kp_eq2.
     Defined.    
   End Cocone.
@@ -171,19 +171,19 @@ Module Cocone2.
     
     Definition equiv_delta_cocone Z : cech2_delta_cocone Z <~> cech2_delta_cocone' Z.
     Proof.
-      rapply @equiv_adjointify.
+      simple refine (equiv_adjointify _ _ _ _).
       - intros [q1 q2 H1 H2 K coh1 coh2].
-        rapply @Build_cech2_delta_cocone'.
+        unshelve rapply @Build_cech2_delta_cocone'.
         exact q1. intro x. exact (H1 x @ (H2 _)^).
         intro x; cbn.
         exact ((coh1 x @@ inverse2 (coh2 x)) @ concat_pV _).
       - intros [q H H1].
-        rapply @Build_cech2_delta_cocone.
+        unshelve rapply @Build_cech2_delta_cocone.
         exact q. exact (q o π2). exact H. exact (λ _, 1).
         exact (λ _, 1). 
         exact H1. intro; reflexivity.
       - intros [q H H1].
-        rapply path_cocone'; intro x; cbn.
+        unshelve rapply path_cocone'; intro x; cbn.
         + reflexivity.
         + exact (concat_p1 _ @ concat_p1 _ @ (concat_1p _)^).
         + cbn. set (H1' := H1 x) in *; clearbody H1'; clear H1.
@@ -191,9 +191,9 @@ Module Cocone2.
           rewrite <- (inv_V H1').
           destruct H1'^. reflexivity.
       - intros [q1 q2 H1 H2 K coh1 coh2].
-        rapply path_cocone; intro x; cbn; try reflexivity.
-        refine (concat_pp_p @ _).
-        refine ((1 @@ concat_Vp _) @ _).
+        unshelve rapply path_cocone; intro x; cbn; try reflexivity.
+        simple refine (concat_pp_p @ _).
+        simple refine ((1 @@ concat_Vp _) @ _).
         exact (concat_p1 _ @ (concat_1p _)^).
         set (coh1' := coh1 x); clearbody coh1'; clear coh1.
         set (coh2' := coh2 x); clearbody coh2'; clear coh2.
@@ -209,7 +209,7 @@ Module Cocone2.
     Definition postcompose_cocone {X} (C: cech2_delta_cocone X) Y (g: X -> Y)
       : @cech2_delta_cocone Y.
     Proof.
-      rapply @Build_cech2_delta_cocone.
+      unshelve rapply @Build_cech2_delta_cocone.
       exact (g o (q1 C)). exact (g o (q2 C)).
       all: intro x; cbn; apply ap.
       apply H1. apply H2. apply K. apply coh1. apply coh2.
@@ -221,7 +221,7 @@ Module Cocone2.
     Definition postcompose_cocone' {X} (C: cech2_delta_cocone' X) Y (g: X -> Y)
       : @cech2_delta_cocone' Y.
     Proof.
-      rapply @Build_cech2_delta_cocone'.
+      unshelve rapply @Build_cech2_delta_cocone'.
       exact (g o (q C)).
       all: intro x; cbn.
       apply ap, Hq. exact (ap (ap g) (cohq C x)).
@@ -235,13 +235,13 @@ Module Cocone2.
       intros [C HC].
       exists ((equiv_delta_cocone _)^-1 C).
       intro Y.
-      refine (isequiv_homotopic
+      simple refine (isequiv_homotopic
                 ((equiv_delta_cocone Y)^-1 o (postcompose_cocone' C Y))
                 (H:=isequiv_compose) _).
-      intro g. rapply path_cocone.
+      intro g. unshelve rapply path_cocone.
       all: intro; try reflexivity.
       exact (concat_p1 _ @ (concat_1p _)^).
-      refine (concat_p1 _ @ _).
+      simple refine (concat_p1 _ @ _).
       change ( ap (ap g) (cohq C x) @@ 1
                = (concat_p1 (ap g (Hq C (δ x)))
                             @ (concat_1p (ap g (Hq C (δ x))))^)
@@ -255,22 +255,22 @@ Module Cocone2.
     Goal is_colimit (KP' f).
     Proof.
       apply colimit'_colimit.
-      rapply @exist.
-      - rapply @Build_cech2_delta_cocone'.
+      unshelve rapply @exist.
+      - unshelve rapply @Build_cech2_delta_cocone'.
         exact kp. all: intro x; cbn.
         exact (kp_eq _ _ x.2.2).
         apply kp_eq2.
-      - intro Y. rapply @isequiv_adjointify.
-        + intro C. rapply @KP_rec.
+      - intro Y. unshelve rapply @isequiv_adjointify.
+        + intro C. unshelve rapply @KP_rec.
           exact (q C).
           intros a b p. exact (Hq C (a; (b; p))).
           intro a; cbn. exact (cohq C _ ).
         + intros [q Hq cohq].
-          rapply @path_cocone'; cbn.
+          unshelve rapply @path_cocone'; cbn.
           all: intro x; try reflexivity; cbn.
-          refine (concat_p1 _ @ _ @ (concat_1p _)^).
+          simple refine (concat_p1 _ @ _ @ (concat_1p _)^).
           apply KP_rec_beta_kp_eq.
-          cbn. refine (concat_p1 _ @ _).
+          cbn. simple refine (concat_p1 _ @ _).
           set ((ap (KP_rec Y q (λ (a b : A) (p : f a = f b), Hq (a; (b; p))) (λ a : A, cohq a))
                    (kp_eq x x 1))).
           set (KP_rec Y q (λ (a b : A) (p0 : f a = f b), Hq (a; (b; p0))) (λ a : A, cohq a)).
@@ -285,11 +285,11 @@ Module Cocone2.
           pose (whiskerR_p1 (ap (ap y) (kp_eq2 x))).
           pose (moveL_pV _ _ _ p1).
           pose (moveL_Vp _ _ _ p2).
-          refine (p3 @ _). clear. cbn. hott_simpl.
-          refine (concat_p1 _ @ _ @ concat_p_pp).
+          simple refine (p3 @ _). clear. cbn. hott_simpl.
+          simple refine (concat_p1 _ @ _ @ concat_p_pp).
           assert (p0 @ cohq x = ap (ap y) (kp_eq2 x)). {
-            refine (_^ @ ap02_is_ap y (kp_eq2 x)).
-            refine (KP_rec_beta_kp_eq2 _ _ _ _ _). }
+            simple refine (_^ @ ap02_is_ap y (kp_eq2 x)).
+            simple refine (KP_rec_beta_kp_eq2 _ _ _ _ _). }
           rewrite X. f_ap.
         + intro g; cbn.
           apply path_forall; intro x.

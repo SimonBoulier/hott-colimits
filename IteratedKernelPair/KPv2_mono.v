@@ -29,11 +29,11 @@ Section KP2_mono.
     : KP' f -> Type.
   Proof.
     unfold IsMono in Mf.
-    refine (KP_rec _ _ _ _).
+    simple refine (KP_rec _ _ _ _).
     - intro b; exact (a = b).
     - intros x y p. 
       apply path_universe_uncurried.
-      refine (equiv_concat_r _ _). exact ((ap f)^-1 p).
+      simple refine (equiv_concat_r _ _). exact ((ap f)^-1 p).
     - intro x; cbn.
       unfold equiv_concat_r.
       apply moveR_equiv_V. apply path_equiv. cbn.
@@ -69,10 +69,10 @@ Section KP2_mono.
     destruct q; cbn.
     path_via (transport (λ w : KP' f, KP_Cover f Mf a w → kp a = w) 
                         (kp_eq x a (ap f ((ap f)^-1 p))) (KP_decode_fun A B f Mf a x) 1).
-    refine (ap10 (transport2 _ _ _) _).
+    simple refine (ap10 (transport2 _ _ _) _).
     apply ap. symmetry; apply eisretr.
     generalize ((ap f)^-1 p). intro q; destruct q. cbn.
-    refine (ap10 (transport2 _ (kp_eq2 x) _) _).
+    simple refine (ap10 (transport2 _ (kp_eq2 x) _) _).
   Defined.
 
   Lemma KP_decode_coh2:
@@ -90,7 +90,9 @@ Section KP2_mono.
     apply moveL_Mp.
     match goal with
     |[|- _ = match ?foo as p in (_ = y) return ?P1 with |1 => ?P2 end 1] =>
-     rewrite <- (apD (λ U, match U as p in (_ = y) return P1 with |1 => P2 end 1) (eissect (ap f) 1)^)
+     rewrite <- (apD (λ U, match U as p in (_ = y) return (f a = f y
+       → transport (λ w : KP' f, KP_Cover f Mf y w → kp y = w) (kp_eq a y (ap f p))
+           (λ p1 : y = a, ap kp p1) 1 = 1) with |1 => P2 end 1) (eissect (ap f) 1)^)
     end.
     rewrite transport_paths_Fl.
     apply whiskerR.
@@ -113,8 +115,8 @@ Section KP2_mono.
     :  forall b:KP' f, (KP_Cover f Mf a b -> (kp a = b)).
   Proof.
     unfold IsMono in Mf.
-    refine (KP_ind _ _ _ _).
-    - apply KP_decode_fun. 
+    simple refine (KP_ind _ _ _ _).
+    - cbn. eapply KP_decode_fun. 
     - apply KP_decode_coh1. 
     - apply KP_decode_coh2.
   Defined.
@@ -123,10 +125,10 @@ Section KP2_mono.
     : forall e, IsEquiv (KP_encode f Mf a e).
   Proof.
     intro e. unfold IsMono in Mf.
-    refine (isequiv_adjointify _ _ _).
+    simple refine (isequiv_adjointify _ _ _).
     - apply KP_decode. 
     - revert e.
-      refine (KP_ind _ _ _ _).
+      simple refine (KP_ind _ _ _ _).
       + intros b p; cbn in *.
         unfold KP_encode, KP_decode_fun. cbn.
         destruct p; cbn. reflexivity.
@@ -134,18 +136,32 @@ Section KP2_mono.
         match goal with
         |[|- transport ?PP (?ff p) ?gg = _] =>
          path_via (transport PP (ff (ap f ((ap f)^-1 p))) gg);
-           [refine (transport2 PP (p:=(kp_eq x y p)) _ gg); apply ap; symmetry; apply eisretr |]
+           [simple refine (transport2 PP (p:=(kp_eq x y p)) _ gg); apply ap; symmetry; apply eisretr |]
         end.
         generalize dependent ((ap f)^-1 p). intro q. destruct q; cbn.
         match goal with
         |[|- transport ?PP _ ?gg = _] =>
-         refine (transport2 PP (p:=(kp_eq x x 1)) (q:=1) _ gg)
+         simple refine (transport2 PP (p:=(kp_eq x x 1)) (q:=1) _ gg)
         end.
         apply kp_eq2.
       + intro x; cbn.
         match goal with
         |[|- _ = _ @ match ?foo as p in (_=y) return ?P1 with |1 => ?P2 end 1] =>
-         rewrite <- (apD (λ U, match U as p in (_=y) return P1 with |1 => P2 end) (eissect (ap f) 1)^); cbn
+         rewrite <- (apD (λ U, match U as p in (_=y) return (f x = f y
+       → transport (λ w : KP' f, Sect (KP_decode f Mf a w) (KP_encode f Mf a w))
+           (kp_eq x y (ap f p))
+           (λ p1 : a = x,
+            match
+              p1 as p2 in (_ = y0) return (transport (KP_Cover f Mf a) (ap kp p2) 1 = p2)
+            with
+            | 1 => 1
+            end) =
+         (λ p1 : a = y,
+          match
+            p1 as p2 in (_ = y0) return (transport (KP_Cover f Mf a) (ap kp p2) 1 = p2)
+          with
+          | 1 => 1
+          end)) with |1 => P2 end) (eissect (ap f) 1)^); cbn
         end.
         rewrite transport_arrow.
         rewrite transport_paths_Fl.
@@ -170,9 +186,9 @@ Section KP2_mono.
     intros Mf a b.
     pose (isequiv_inverse _ (feq := KP_encode_decode f Mf a (kp b))). cbn in i.
     unfold KP_decode_fun in i. cbn in i.
-    refine (isequiv_homotopic ((ap kp) o (ap f)^-1 o (ap f)) _).
+    simple refine (isequiv_homotopic ((ap kp) o (ap f)^-1 o (ap f)) _).
     apply Mf.
-    refine (isequiv_compose (f:= ap f) (g:=(λ p : f a = f b, ap kp ((ap f)^-1 p)))).
+    simple refine (isequiv_compose (f:= ap f) (g:=(λ p : f a = f b, ap kp ((ap f)^-1 p)))).
     apply Mf.
     intro x. apply ap. apply eissect.
   Defined.
@@ -181,20 +197,20 @@ Section KP2_mono.
     : IsMono f -> IsMono (KP_rec B f (λ (a b : A) (p : f a = f b), p) (λ a : A, 1)).
   Proof.
     intro Mf. unfold IsMono in Mf.
-    refine (KP_ind _ _ _ _);
-      [| intros; refine (path_ishprop _ _) | intros; refine (path_ishprop _ _)].
+    simple refine (KP_ind _ _ _ _);
+      [| intros; simple refine (path_ishprop _ _) | intros; simple refine (path_ishprop _ _)].
     intro a.
-    refine (KP_ind _ _ _ _);
-      [| intros; refine (path_ishprop _ _) | intros; refine (path_ishprop _ _)].
+    simple refine (KP_ind _ _ _ _);
+      [| intros; simple refine (path_ishprop _ _) | intros; simple refine (path_ishprop _ _)].
     intro b.
     pose (i:= KP_encode_decode f Mf a (kp b)); cbn in i.
-    refine (isequiv_homotopic (ap f o (KP_encode f Mf a (kp b))) _).
+    simple refine (isequiv_homotopic (ap f o (KP_encode f Mf a (kp b))) _).
     intro x; cbn.
     unfold KP_encode.
     pose (i0 := Mono_preservation_kp f Mf a b).
     path_via (ap f (transport (KP_Cover f Mf a) (ap kp ((ap kp)^-1 x)) 1)).
     apply ap.
-    refine (transport2 (KP_Cover f Mf a) (p:=x) _ 1). symmetry; apply eisretr.
+    simple refine (transport2 (KP_Cover f Mf a) (p:=x) _ 1). symmetry; apply eisretr.
     path_via (ap (KP_rec B f (λ (a0 b0 : A) (p : f a0 = f b0), p) (λ a0 : A, 1)) (ap kp ((ap kp)^-1 x))).
     2: apply ap; apply eisretr.
     generalize ((ap kp)^-1 x).
