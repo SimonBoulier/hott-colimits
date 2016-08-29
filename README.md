@@ -24,9 +24,14 @@ https://github.com/peterlefanulumsdaine/hott-limits/
 # Compilation
 
 You need coq 8.5 and the HoTT library.
+
 You have to precise the location of your `hoqc` in the files _CoqProject and .dir-locals.el (only for Proof General).
+
 Then run:
+
      coq_makefile -f _CoqProject -o Makefile
+
      make
+
 
 The compilation takes several minutes on my laptop.
