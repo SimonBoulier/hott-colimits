@@ -8,6 +8,25 @@ Tactic Notation "sym" simple_intropattern(H) := symmetry; apply H.
 
 Global Open Scope path_scope.
 
+Ltac simple_rapply p :=
+  simple refine p ||
+  simple refine (p _) ||
+  simple refine (p _ _) ||
+  simple refine (p _ _ _) ||
+  simple refine (p _ _ _ _) ||
+  simple refine (p _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _ _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _ _ _ _ _ _ _ _) ||
+  simple refine (p _ _ _ _ _ _ _ _ _ _ _ _ _ _ _).
+
+Tactic Notation "use" open_constr(term) := simple_rapply term.
 
 Ltac set_path :=
   match goal with
