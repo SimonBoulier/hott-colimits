@@ -11,6 +11,16 @@ Section MappingTelescope.
     - intros n m; exact (S n = m).
   Defined.
 
+
+  Definition sequence := diagram mappingtelescope_graph.
+
+  Definition Build_sequence (X : nat -> Type) (f : forall n, X n -> X n.+1)
+    : sequence.
+    unshelve econstructor.
+    exact X. intros i j p; destruct p. apply f.
+  Defined.
+  
+  
   Definition equiv_mappingtelescope_diag (D1 D2: diagram mappingtelescope_graph)
              (H0: (D1 0) <~> (D2 0))
              (Hn: forall n (e: (D1 n) <~> (D2 n)),

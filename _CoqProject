@@ -14,7 +14,7 @@ CommutativeSquares.v
 Diagram.v
 Colimit_trunc.v
 
-# IteratedKernelPair/MappingTelescope.v
+MappingTelescope.v
 # IteratedKernelPair/KernelPair_v1.v
 # IteratedKernelPair/KernelPair_v2.v
 # IteratedKernelPair/IteratedKernelPair.v
@@ -23,3 +23,4 @@ Colimit_trunc.v
 
 Colimits.v
 Pushout.v
+Flattening.v
