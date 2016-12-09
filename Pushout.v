@@ -35,7 +35,7 @@ Section PO.
   Definition is_PO := is_colimit span.
 
   
-  Definition Build_span_cocone (Z : Type)
+  Definition Build_span_cocone {Z : Type}
              (inl' : B -> Z) (inr' : C -> Z)
              (pp' : inl' o f == inr' o g)
     : cocone span Z.
@@ -45,6 +45,16 @@ Section PO.
     - intros [] [] []; cbn. destruct b.
       exact pp'. reflexivity.
   Defined.
+
+  Definition PO_rec (P: Type) (l': B -> P) (r': C -> P)
+             (pp': l' o f == r' o g)
+    : PO -> P
+    := colimit_rec P (Build_span_cocone l' r' pp').
+
+  Definition PO_rec_beta_pp (P: Type) (l': B -> P) (r': C -> P)
+             (pp': l' o f == r' o g)
+    : forall x, ap (PO_rec P l' r' pp') (popp x) = pp' x.
+  Admitted.
 
   (* Definition Build_is_PO (X : Type) (inl' : B -> X) (inr' : C -> X) *)
   (*            (pp' : forall a, inl' (f a) = inr' (g a)) *)
@@ -120,10 +130,10 @@ Section PO_square.
   Definition span_of_square : diagram PO_graph
     := span (sqf S) (sqg S).
 
-  Definition cocone_of_square : cocone span_of_square (sqD S)
-    := Build_span_cocone _ _ _ _ _ (comm_sq_eq S).
+  (* Definition cocone_of_square : cocone span_of_square (sqD S) *)
+  (*   := Build_span_cocone _ _ _ _ _ (comm_sq_eq S). *)
   
-  Definition is_PO_square := is_universal cocone_of_square.
+  (* Definition is_PO_square := is_universal cocone_of_square. *)
 
   
     
@@ -167,35 +177,35 @@ Section PO_square.
   (* Defined. *)
 
 
-  Definition equiv_squares_PO (HS : is_PO_square)
-    : square_equiv (Build_square (sqf S) (sqg S) (pol (sqf S) (sqg S)) (por _ _)) S.
-    (* pose (is_colimit_H (is_colimit_colimit (span (sqf S) (sqg S))) (comm_sq_S S DR)). *)
-    use Build_diagram_equiv; cbn.
-    - use Build_diagram_map; cbn.
-      + intros []; try exact idmap.
-        (* exact (@equiv_inv _ _ _ i cocone_of_square). *)
-        use colimit_rec. exact cocone_of_square.
-      + intros [] [] [] x; reflexivity.
-    - intros []; cbn. all: try apply isequiv_idmap.
-      pose (is_colimit_H (is_colimit_colimit (span (sqf S) (sqg S))) (comm_sq_S S DR)).
-      pose (@equiv_inv _ _ _ i). cbn in d.
-      specialize (HS (PO (sqf S) (sqg S))).
-      use isequiv_adjointify.
-      + refine (@equiv_inv _ _ _ HS _).
-        refine (Build_span_cocone _ _ _ (pol _ _) (por _ _) _).
-        intro; apply popp.
-      + intro.
-        pose (@eisretr _ _ _ HS). unfold Sect in s.
+  (* Definition equiv_squares_PO (HS : is_PO_square) *)
+  (*   : square_equiv (Build_square (sqf S) (sqg S) (pol (sqf S) (sqg S)) (por _ _)) S. *)
+  (*   (* pose (is_colimit_H (is_colimit_colimit (span (sqf S) (sqg S))) (comm_sq_S S DR)). *) *)
+  (*   use Build_diagram_equiv; cbn. *)
+  (*   - use Build_diagram_map; cbn. *)
+  (*     + intros []; try exact idmap. *)
+  (*       (* exact (@equiv_inv _ _ _ i cocone_of_square). *) *)
+  (*       use colimit_rec. exact cocone_of_square. *)
+  (*     + intros [] [] [] x; reflexivity. *)
+  (*   - intros []; cbn. all: try apply isequiv_idmap. *)
+  (*     pose (is_colimit_H (is_colimit_colimit (span (sqf S) (sqg S))) (comm_sq_S S DR)). *)
+  (*     pose (@equiv_inv _ _ _ i). cbn in d. *)
+  (*     specialize (HS (PO (sqf S) (sqg S))). *)
+  (*     use isequiv_adjointify. *)
+  (*     + refine (@equiv_inv _ _ _ HS _). *)
+  (*       refine (Build_span_cocone _ _ _ (pol _ _) (por _ _) _). *)
+  (*       intro; apply popp. *)
+  (*     + intro. *)
+  (*       pose (@eisretr _ _ _ HS). unfold Sect in s. *)
 
 
-      cbn in i.
-      pose proof (@isequiv_inverse _ _ _ i). cbn in X.
-      pose  (@equiv_inv _ _ _ X). cbn in d0.
-      unfold postcompose_cocone, is_colimit_colimit, cocone_colimit in d0. 
-      exact X0.
-      unfold is_universal in X.
+  (*     cbn in i. *)
+  (*     pose proof (@isequiv_inverse _ _ _ i). cbn in X. *)
+  (*     pose  (@equiv_inv _ _ _ X). cbn in d0. *)
+  (*     unfold postcompose_cocone, is_colimit_colimit, cocone_colimit in d0.  *)
+  (*     exact X0. *)
+  (*     unfold is_universal in X. *)
       
-      unfold colimit_rec, colimit_ind. cbn.
+  (*     unfold colimit_rec, colimit_ind. cbn. *)
   
-End Squares.
+End PO_square.
   

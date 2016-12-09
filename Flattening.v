@@ -330,6 +330,85 @@ Section Flattening.
 
 End Flattening.
 
+
+    Definition path_diagram {G: graph} (D1 D2: diagram G)
+               (eq1 : forall i, D1 i = D2 i)
+               (eq2 : forall i j (g : G i j) x, transport idmap (eq1 j) (D1 _f g x) = D2 _f g (transport idmap (eq1 i) x))
+      : D1 = D2.
+    Admitted.
+
+    
+Module POCase.
+Section POCase.
+  Require Import Colimits.Pushout.
+          
+  Context {A B C} {f: A -> B} {g: A -> C}.
+  
+  (* Let S : commuting_square := (Build_square f g po_l po_r; pp). *)
+  
+  Context `{Univalence} (A0 : A -> Type) (B0 : B -> Type) (C0 : C -> Type)
+          (f0 : forall x, A0 x <~> B0 (f x)) (g0 : forall x, A0 x <~> C0 (g x)).
+
+  Let P : PO f g -> Type.
+    simple refine (PO_rec _ _ Type B0 C0 _).
+    cbn; intro x. eapply path_universe_uncurried.
+    etransitivity. symmetry. apply f0. apply g0.
+  Defined.
+
+  (* Definition S' : commuting_square. *)
+  (*   simple refine (Build_square _ _ _ _; _). *)
+  (*   exact (sig A0). exact (sig B0). exact (sig C0). exact (sig P). *)
+  (*   exact (functor_sigma f f0). exact (functor_sigma g g0). *)
+  (*   - refine (functor_sigma po_l _). simpl. intro; exact idmap. *)
+  (*   - refine (functor_sigma po_r _). simpl. intro; exact idmap. *)
+  (*   - cbn; intros [x z]. symmetry. simple refine (path_sigma' _ _ _); cbn. *)
+  (*     apply po_pp. rewrite transport_idmap_ap. *)
+  (*     rewrite pushout_rec_beta_pp. *)
+  (*     rewrite transport_path_universe_uncurried. cbn. *)
+  (*     rewrite eissect. reflexivity. *)
+  (* Defined. *)
+
+  Let E : dep_diagram (span f g).
+    simple refine (Build_diagram _ _ _); cbn.
+      intros [[] x]; revert x. exact A0. destruct b; assumption.
+      intros [[] x] [[] y] []; cbn; intros [].
+      destruct b; intro p. exact (fun y => p # (f0 x y)).
+      exact (fun y => p # (g0 x y)).
+  Defined.
+
+  Let HE : equifibered _ E.
+    intros [] [] [] x; cbn. destruct b; cbn in *.
+    apply (f0 x). apply (g0 x).
+  Defined.
+
+  Let flat := flattening_lemma _ E HE.
+
+
+  Goal PO (functor_sigma f f0) (functor_sigma g g0) = colimit (sigma_diagram (span f g) E).
+    unfold PO; apply ap.
+    use path_diagram; cbn.
+    - intros [|[]]; cbn. all: reflexivity.
+    - intros [] [] [] x; destruct b; cbn in *.
+      all: reflexivity.
+  Defined.
+
+  Goal forall x, E' (span f g) E HE x = P x.
+    clear.
+    intro x. unfold E', P, PO_rec.
+    f_ap. use path_cocone.
+    - intros [[]|[]] y; cbn.
+      apply path_universe_uncurried. apply g0.
+      all: reflexivity.
+    - intros [] [] []; cbn.
+      destruct b, u; intro y; simpl; hott_simpl.
+      unfold path_universe. cbn.
+      admit. (* a l'air facile *)
+  Defined.
+
+End POCase.
+End POCase.
+
+
 Section PushoutCase.
   Require Import Colimits.Pushout.
   
@@ -390,19 +469,19 @@ Section PushoutCase.
   
        
   
-  Goal is_PO_square S'.
-    unfold is_PO_square.
-    simple refine (let X := is_universal_cocone_E' (span f g) E HE in _).
-    - simple refine (Build_diagram _ _ _); cbn.
-      intros [[] x]; revert x. exact A0. destruct b; assumption.
-      intros [[] x] [[] y] []; cbn; intros [].
-      destruct b; intro p. exact (fun y => p # (f0 x y)).
-      exact (fun y => p # (g0 x y)).
-    - intros [] [] [] x; cbn. destruct b; cbn in *.
-      apply (f0 x). apply (g0 x).
-    - cbn in X.
-
-  
+  (* Goal is_PO_square S'. *)
+  (*   unfold is_PO_square. *)
+  (*   simple refine (let X := is_universal_cocone_E' (span f g) E HE in _). *)
+  (*   - simple refine (Build_diagram _ _ _); cbn. *)
+  (*     intros [[] x]; revert x. exact A0. destruct b; assumption. *)
+  (*     intros [[] x] [[] y] []; cbn; intros []. *)
+  (*     destruct b; intro p. exact (fun y => p # (f0 x y)). *)
+  (*     exact (fun y => p # (g0 x y)). *)
+  (*   - intros [] [] [] x; cbn. destruct b; cbn in *. *)
+  (*     apply (f0 x). apply (g0 x). *)
+  (*   - cbn in X. *)
+  Abort All.
+End PushoutCase.  
                
   (* Definition F X (Q : cocone sigma_diagram X) : forall x, E' x → X. *)
   (*   simple refine (colimit_ind _ _ _); cbn. *)
@@ -459,6 +538,7 @@ Section PushoutCase.
   (*       apply moveR_Vp. hott_simpl. *)
   (*       rewrite <- transport2_is_ap. *)
   (*       unfold transport_E'_V. *)
-        
+
+
      
       
