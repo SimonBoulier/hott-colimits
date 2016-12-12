@@ -4,16 +4,19 @@ COQC = ~/Dépôts/HoTT/hoqc
 
 MyTacs.v
 MyLemmas.v
-
-CoEqualizer.v
-Colimit_Prod.v
-Colimit_Sigma.v
-Colimit.v
 CommutativeSquares.v
 Diagram.v
+Colimit.v
+Colimit_Prod.v
+Colimit_Sigma.v
 Colimit_trunc.v
 
+CoEqualizer.v
+Pushout.v
 MappingTelescope.v
+
+Flattening.v
+
 IteratedKernelPair/KernelPair_v1.v
 IteratedKernelPair/KernelPair_v2.v
 IteratedKernelPair/IteratedKernelPair.v
@@ -21,5 +24,3 @@ IteratedKernelPair/KPv2_mono.v
 IteratedKernelPair/link_KPv2_CechNerve.v
 
 Colimits.v
-Pushout.v
-Flattening.v

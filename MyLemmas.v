@@ -4,10 +4,10 @@ Generalizable All Variables.
 
 
 
-Lemma ap_apply_truc {A B: Type} {P: A -> Type} {f g: forall a: A, P a -> B} (p: f = g) (a: A) (x: P a)
-: ap (λ F, F a x) p = ap10 (apD10 p a) x.
-  destruct p; reflexivity.
-Defined.
+(* Lemma ap_apply_truc {A B: Type} {P: A -> Type} {f g: forall a: A, P a -> B} (p: f = g) (a: A) (x: P a) *)
+(* : ap (λ F, F a x) p = ap10 (apD10 p a) x. *)
+(*   destruct p; reflexivity. *)
+(* Defined. *)
 
 Lemma ap_apply_truc_2 {A B D: Type} {C: B -> Type} (M: A -> forall b:B, C b -> D) {a a': A} (p: a = a') (b: B) (c: C b)
 : ap (λ F, M F b c) p = ap10 (apD10 (ap M p) b) c.
@@ -20,17 +20,17 @@ Lemma ap_path_sigma_1 {A B: Type} {P: A -> Type} (F: forall a: A, P a -> B) (a: 
   destruct p; reflexivity.
 Defined.
 
-Lemma apD_pp `{P: A -> Type} (f: forall a, P a) {x y z: A} (p: x = y) (q: y = z)
-: apD f (p @ q) = (transport_pp P p q (f x)) @ (ap _ (apD f p)) @ (apD f q).
-    by path_induction.
-Qed.
+(* Lemma apD_pp `{P: A -> Type} (f: forall a, P a) {x y z: A} (p: x = y) (q: y = z) *)
+(* : apD f (p @ q) = (transport_pp P p q (f x)) @ (ap _ (apD f p)) @ (apD f q). *)
+(*     by path_induction. *)
+(* Qed. *)
 
 
-Definition transport_const_transportD {A B: Type} (C: A -> B -> Type) {x1 x2: A} (p: x1 = x2) `(u: C x1 y) 
-: transport (λ y, C x2 y) (transport_const p y)
-            (transportD (λ _ : A, B) C p y u) = transport (λ x, C x y) p u.
-  destruct p. reflexivity.
-Defined.
+(* Definition transport_const_transportD {A B: Type} (C: A -> B -> Type) {x1 x2: A} (p: x1 = x2) `(u: C x1 y)  *)
+(* : transport (λ y, C x2 y) (transport_const p y) *)
+(*             (transportD (λ _ : A, B) C p y u) = transport (λ x, C x y) p u. *)
+(*   destruct p. reflexivity. *)
+(* Defined. *)
 
 
 Lemma path_sig_hfiber `{f: A -> B} (x y : sig (hfiber f)) (q : x.2.1 = y.2.1) : x = y.
@@ -48,10 +48,10 @@ Lemma equiv_paths {A: Type} {a a' b: A} (p: a = a') : a = b <~> a' = b.
   simple refine (equiv_adjointify (concat p^) (concat p) _ _); intro; abstract hott_simpl.
 Defined.
   
-Definition transport_hfiber `(f: A -> B) `(e: b = b') `(p: f a = b)
-: transport (λ b, hfiber f b) e (a; p) = (a; p @ e).
-  path_induction. reflexivity.
-Defined.
+(* Definition transport_hfiber `(f: A -> B) `(e: b = b') `(p: f a = b) *)
+(* : transport (λ b, hfiber f b) e (a; p) = (a; p @ e). *)
+(*   path_induction. reflexivity. *)
+(* Defined. *)
 
 
 Definition functor_fibration_replacement `{f: X -> Y} `{f': X' -> Y} (g: X -> X')
@@ -109,12 +109,12 @@ Proof.
   destruct p; reflexivity.
 Defined.
 
-Lemma whiskerL_LV (A : Type) (x y z: A) (p : x = y) (q q' : y = z) 
-      (r : q = q')
-  : whiskerL p r^ = (whiskerL p r)^.
-Proof.
-  destruct r, q, p; reflexivity.
-Qed.
+(* Lemma whiskerL_LV (A : Type) (x y z: A) (p : x = y) (q q' : y = z)  *)
+(*       (r : q = q') *)
+(*   : whiskerL p r^ = (whiskerL p r)^. *)
+(* Proof. *)
+(*   destruct r, q, p; reflexivity. *)
+(* Qed. *)
 
 Lemma whiskerR_RV (A : Type) (x y z: A) (p : y = z) (q q' : x = y) 
       (r : q = q')
@@ -148,20 +148,20 @@ Proof.
   destruct r. reflexivity.
 Defined.
 
-Lemma ap_FG {A B:Type} {a b:A} {d e f:B} (F: a = b -> e = f) (G: a = b -> f = d)
-      {u v:a = b} (p: u = v)
-  : ap (λ x, F x @ G x) p = ap F p @@ ap G p.
-Proof.
-  destruct p.
-  reflexivity.
-Defined.
+(* Lemma ap_FG {A B:Type} {a b:A} {d e f:B} (F: a = b -> e = f) (G: a = b -> f = d) *)
+(*       {u v:a = b} (p: u = v) *)
+(*   : ap (λ x, F x @ G x) p = ap F p @@ ap G p. *)
+(* Proof. *)
+(*   destruct p. *)
+(*   reflexivity. *)
+(* Defined. *)
 
-Lemma concat2_inv (A : Type) (x y z : A) (p p' : x = y) (q q' : y = z)
-      (r:p=p') (s:q=q')
-  : (r @@ s)^ = (r^ @@ s^).
-Proof.
-  destruct r, s. reflexivity.
-Defined.
+(* Lemma concat2_inv (A : Type) (x y z : A) (p p' : x = y) (q q' : y = z) *)
+(*       (r:p=p') (s:q=q') *)
+(*   : (r @@ s)^ = (r^ @@ s^). *)
+(* Proof. *)
+(*   destruct r, s. reflexivity. *)
+(* Defined. *)
 
 Unset Implicit Arguments.
 

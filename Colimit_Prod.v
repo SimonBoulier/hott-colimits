@@ -1,8 +1,6 @@
 Require Import HoTT.Basics HoTT.Types.
 Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.Colimit_Sigma.
 
-Context `{Funext}.
-
 Section ColimitProd.
   Context {G: graph} (D: diagram G) (A: Type).
 

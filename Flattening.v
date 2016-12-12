@@ -1,4 +1,4 @@
-Require Import HoTT.Basics HoTT.Types MyTacs Colimits.
+Require Import HoTT.Basics HoTT.Types MyTacs Diagram Colimit.
 
 
 Definition ap_path_sigma {A B} (P : A → Type) (F : ∀ a : A, P a → B) 
@@ -9,20 +9,20 @@ Definition ap_path_sigma {A B} (P : A → Type) (F : ∀ a : A, P a → B)
     by path_induction.
 Defined.
 
-Definition Book_2_9_7_aux {X} (A : X -> Type) (B : forall x, A x -> Type) {x y : X} (p : x = y)
-           (f : forall a, B x a) (g : forall b, B y b)
-           (H : forall a : A x, transport (fun w : sig A => B w.1 w.2) (path_sigma' A p 1) (f a)
-                           = g (p # a))
-  : transport (fun x => forall a : A x, B x a) p f = g.
-Admitted.
+(* Definition Book_2_9_7_aux {X} (A : X -> Type) (B : forall x, A x -> Type) {x y : X} (p : x = y) *)
+(*            (f : forall a, B x a) (g : forall b, B y b) *)
+(*            (H : forall a : A x, transport (fun w : sig A => B w.1 w.2) (path_sigma' A p 1) (f a) *)
+(*                            = g (p # a)) *)
+(*   : transport (fun x => forall a : A x, B x a) p f = g. *)
+(* Admitted. *)
 
-Definition Book_2_9_7 {X} (A : X -> Type) (B : forall x, A x -> Type) {x y : X} (p : x = y)
-           (f : forall a, B x a) (g : forall b, B y b)
-  : (transport (fun x => forall a : A x, B x a) p f = g)
-      <~>
-      (forall a : A x, transport (fun w : sig A => B w.1 w.2) (path_sigma' A p 1) (f a) = g (p # a)).
-  refine (equiv_adjointify _ _ _ _).
-Admitted.
+(* Definition Book_2_9_7 {X} (A : X -> Type) (B : forall x, A x -> Type) {x y : X} (p : x = y) *)
+(*            (f : forall a, B x a) (g : forall b, B y b) *)
+(*   : (transport (fun x => forall a : A x, B x a) p f = g) *)
+(*       <~> *)
+(*       (forall a : A x, transport (fun w : sig A => B w.1 w.2) (path_sigma' A p 1) (f a) = g (p # a)). *)
+(*   refine (equiv_adjointify _ _ _ _). *)
+(* Admitted. *)
 
 Definition moveL_moveR_transport_V {A} (P : A → Type) {x y : A} (p : x = y)
            (u : P x) (v : P y) (e : transport P p u = v)
@@ -43,15 +43,15 @@ Definition ap_transport_moveL_transport_V {A} (P : A → Type) {x y : A} (p : x 
     by destruct e, p.
 Defined.
 
-Definition path_sigma_1p_p1' {A : Type} (P : A -> Type)
-           {u1 v1 : A} {u2 : P u1} {v2 : P v1}
-           (p : u1 = v1) (q : p# u2 = v2)
-: path_sigma' P p q
-  = path_sigma' P 1 (moveL_transport_V P p _ _ q) @ path_sigma' P p (transport_pV _ _ _).
-Proof.
-  destruct p, q.
-  reflexivity.
-Defined.
+(* Definition path_sigma_1p_p1' {A : Type} (P : A -> Type) *)
+(*            {u1 v1 : A} {u2 : P u1} {v2 : P v1} *)
+(*            (p : u1 = v1) (q : p# u2 = v2) *)
+(* : path_sigma' P p q *)
+(*   = path_sigma' P 1 (moveL_transport_V P p _ _ q) @ path_sigma' P p (transport_pV _ _ _). *)
+(* Proof. *)
+(*   destruct p, q. *)
+(*   reflexivity. *)
+(* Defined. *)
 
 Definition path_sigma_1p' {A : Type} (P : A -> Type)
            {u1 : A} {u2 v2 : P u1} (q : u2 = v2)

@@ -4,8 +4,6 @@ Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.CoEqua
 Local Open Scope path_scope.
 Generalizable All Variables. 
 
-Context `{Funext}.
-
 Module Export KP.
   Private Inductive KP' {A B:Type} (f: A -> B) : Type :=
   | kp : A -> (KP' f).

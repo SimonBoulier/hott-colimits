@@ -1,13 +1,17 @@
-Require Export Diagram.
+Require Export MyTacs.
+Require Export MyLemmas.
 Require Export CommutativeSquares.
+Require Export Diagram.
 Require Export Colimit.
-Require Export CoEqualizer.
 Require Export Colimit_Prod.
 Require Export Colimit_Sigma.
 Require Export Colimit_trunc.
+
+Require Export CoEqualizer.
+Require Export Pushout.
 Require Export MappingTelescope.
-Require Export MyLemmas.
-Require Export MyTacs.
+
+Require Import Flattening.
 
 Require Export IteratedKernelPair.IteratedKernelPair.
 Require Export IteratedKernelPair.KernelPair_v1.

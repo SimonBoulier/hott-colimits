@@ -4,8 +4,6 @@ Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.CoEqua
 Local Open Scope path_scope.
 Generalizable All Variables. 
 
-Context `{Funext}.
-
 Section KernelPair.
   Definition KP_diag `(f: A -> B) : diagram coequalizer_graph.
     simple refine (Build_diagram _ _ _).

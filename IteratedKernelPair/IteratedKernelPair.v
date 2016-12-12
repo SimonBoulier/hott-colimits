@@ -12,8 +12,6 @@ Require Import KernelPair_v1.
 Local Open Scope path_scope.
 Generalizable All Variables. 
 
-Context `{Funext}.
-
 
 Section CechNerve.
 
