@@ -1,5 +1,5 @@
 Require Import HoTT.Basics HoTT.Types.
-Require Import CommutativeSquares MyLemmas MyTacs.
+Require Import CommutativeSquares MyLemmas MyTacs Tactics.
 
 (* This whole file is adapted from the file Limits1.v of : *)
 (* From https://github.com/peterlefanulumsdaine/hott-limits *)
@@ -20,6 +20,37 @@ Section Diagram.
 End Diagram.
 
 Notation "D '_f' g" := (diagram1 D g) (at level 10).
+
+
+Definition path_diagram_naive {G: graph} (D1 D2: diagram G)
+           (P := fun D' => forall i j, G i j -> (D' i -> D' j))
+           (eq0 : diagram0 D1 = diagram0 D2)
+           (eq1 : transport P eq0 (diagram1 D1) = diagram1 D2)
+: D1 = D2 :=
+  match eq1 in (_ = v1) return D1 = {|diagram0 := diagram0 D2; diagram1 := v1 |} with
+  | idpath =>
+    match eq0 in (_ = v0) return D1 = {|diagram0 := v0; diagram1 := eq0 # (diagram1 D1) |} with
+    | idpath => 1
+    end
+  end.
+
+
+Definition path_diagram {G: graph} (D1 D2: diagram G)
+           (eq1 : forall i, D1 i = D2 i)
+           (eq2 : forall i j (g : G i j) x, transport idmap (eq1 j) (D1 _f g x) = D2 _f g (transport idmap (eq1 i) x))
+  : D1 = D2.
+  use path_diagram_naive.
+  funext i. apply eq1.
+  funext i j g x.
+  rewrite !transport_forall_constant.
+  rewrite transport_arrow.
+  transport_path_forall_hammer.
+  refine (_ @ eq2 i j g (transport (λ y : Type, y) (eq1 i)^ x) @ _).
+  - f_ap. f_ap. f_ap.
+    rewrite <- path_forall_V. funext y.
+    transport_path_forall_hammer. reflexivity.
+  - f_ap. exact (transport_pV idmap _ x).
+Defined.
 
 
 Section DiagramMap.

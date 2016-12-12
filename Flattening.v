@@ -33,7 +33,7 @@ Defined.
 Definition moveL_transport_V_transport {A} (P : A → Type) {x y : A} (p : x = y) (v : P y)
   : moveL_transport_V P p (transport P p^ v) (transport P p (transport P p^ v)) 1
     = ap (transport P p^) (transport_pV P p v)^.
-destruct p. reflexivity.
+  destruct p. reflexivity.
 Defined.
 
 Definition ap_transport_moveL_transport_V {A} (P : A → Type) {x y : A} (p : x = y)
@@ -86,6 +86,7 @@ Section Flattening.
   Let E_f {i j : G} (g : G i j) (x : D i) : E (i; x) -> E (j; (D _f g) x)
       := @diagram1 _ E (i; x) (j; D _f g x) (g; 1).
 
+  (** Given a dependent diagram, we can recover a diagram over G by considering the Σ types. *)
   Definition sigma_diagram : diagram G.
     simple refine (Build_diagram _ _ _).
     - intro i. exact {x : D i & E (i; x)}.
@@ -240,20 +241,12 @@ End Flattening.
 
 
 
-Definition path_diagram {G: graph} (D1 D2: diagram G)
-           (eq1 : forall i, D1 i = D2 i)
-           (eq2 : forall i j (g : G i j) x, transport idmap (eq1 j) (D1 _f g x) = D2 _f g (transport idmap (eq1 i) x))
-  : D1 = D2.
-Admitted.
-
     
 Module POCase.
 Section POCase.
   Require Import Colimits.Pushout.
           
   Context {A B C} {f: A -> B} {g: A -> C}.
-  
-  (* Let S : commuting_square := (Build_square f g po_l po_r; pp). *)
   
   Context `{Univalence} (A0 : A -> Type) (B0 : B -> Type) (C0 : C -> Type)
           (f0 : forall x, A0 x <~> B0 (f x)) (g0 : forall x, A0 x <~> C0 (g x)).
@@ -263,19 +256,6 @@ Section POCase.
     cbn; intro x. eapply path_universe_uncurried.
     etransitivity. symmetry. apply f0. apply g0.
   Defined.
-
-  (* Definition S' : commuting_square. *)
-  (*   simple refine (Build_square _ _ _ _; _). *)
-  (*   exact (sig A0). exact (sig B0). exact (sig C0). exact (sig P). *)
-  (*   exact (functor_sigma f f0). exact (functor_sigma g g0). *)
-  (*   - refine (functor_sigma po_l _). simpl. intro; exact idmap. *)
-  (*   - refine (functor_sigma po_r _). simpl. intro; exact idmap. *)
-  (*   - cbn; intros [x z]. symmetry. simple refine (path_sigma' _ _ _); cbn. *)
-  (*     apply po_pp. rewrite transport_idmap_ap. *)
-  (*     rewrite pushout_rec_beta_pp. *)
-  (*     rewrite transport_path_universe_uncurried. cbn. *)
-  (*     rewrite eissect. reflexivity. *)
-  (* Defined. *)
 
   Let E : dep_diagram (span f g).
     simple refine (Build_diagram _ _ _); cbn.
@@ -290,28 +270,30 @@ Section POCase.
     apply (f0 x). apply (g0 x).
   Defined.
 
-  Let flat := flattening_lemma _ E HE.
-
-
-  Goal PO (functor_sigma f f0) (functor_sigma g g0) = colimit (sigma_diagram (span f g) E).
+  Definition PO_flattening : PO (functor_sigma f f0) (functor_sigma g g0) <~> exists x, P x.
+    assert (PO (functor_sigma f f0) (functor_sigma g g0) = colimit (sigma_diagram (span f g) E)). {
     unfold PO; apply ap.
     use path_diagram; cbn.
     - intros [|[]]; cbn. all: reflexivity.
     - intros [] [] [] x; destruct b; cbn in *.
-      all: reflexivity.
-  Defined.
-
-  Goal forall x, E' (span f g) E HE x = P x.
-    clear.
-    intro x. unfold E', P, PO_rec.
-    f_ap. use path_cocone.
-    - intros [[]|[]] y; cbn.
-      apply path_universe_uncurried. apply g0.
-      all: reflexivity.
-    - intros [] [] []; cbn.
-      destruct b, u; intro y; simpl; hott_simpl.
-      unfold path_universe. cbn.
-      admit. (* a l'air facile *)
+      all: reflexivity. }
+    rewrite X; clear X.
+    transitivity (exists x, E' (span f g) E HE x).
+    apply flattening_lemma.
+    apply equiv_functor_sigma_id.
+    intro x.
+    assert (E' (span f g) E HE x = P x). {
+      unfold E', P, PO_rec.
+      f_ap. use path_cocone.
+      - intros [[]|[]] y; cbn.
+        apply path_universe_uncurried. apply g0.
+        all: reflexivity.
+      - intros [] [] []; cbn.
+        destruct b, u; intro y; simpl; hott_simpl.
+        unfold path_universe.
+        rewrite <- path_universe_V_uncurried.
+        refine (path_universe_compose (f0 y)^-1 (g0 y))^. }
+    rewrite X. reflexivity.
   Defined.
 
 End POCase.
