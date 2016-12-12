@@ -13,7 +13,7 @@ Section KP2_mono.
     := forall x y, IsEquiv (ap f (x:=x) (y:=y)).
 
   Definition ap_kp {A B : Type} (f : A -> B) (Mf: IsMono f)
-    : forall x y (p:f x= f y), ap kp ((equiv_inv _ (IsEquiv := Mf x y)) p) = kp_eq x y p.
+    : forall x y (p:f x= f y), ap kp ((equiv_inv (Mf x y)) p) = kp_eq x y p.
   Proof.
     intros x y p.
     unfold IsMono in Mf.

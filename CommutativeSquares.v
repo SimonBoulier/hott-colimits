@@ -7,10 +7,12 @@ Date: 1 March 2013
 Some basic results on commutative squares, considered as maps of
 arrows.
 
+
+Simon Boulier: slightly adapted for the HoTT-Colimits library.
 *******************************************************************************)
 
+
 Require Import HoTT.
-Require Import Auxiliary.
 
 Section Comm_Squares.
 
@@ -54,12 +56,12 @@ Lemma comm_square_inverse_is_sect
    == fun a:A => (ap f (eissect wA a)).
 Proof.
   intros a; simpl. unfold comm_square_inverse, comm_square_comp; simpl.
-  repeat apply (concat (concat_pp_p)). apply moveR_Vp.
-  path_via' (ap (wB ^-1 o wB) (ap f (eissect wA a)) @ eissect wB (f a)).
+  repeat apply (concat (concat_pp_p _ _ _)). apply moveR_Vp.
+  transitivity (ap (wB ^-1 o wB) (ap f (eissect wA a)) @ eissect wB (f a)).
     Focus 2. apply (concat (concat_Ap (eissect wB) _)). apply ap, ap_idmap.
-  apply (concat (concat_p_pp)), whiskerR.
+  apply (concat (concat_p_pp _ _ _)), whiskerR.
   apply (concat (ap_pp (wB ^-1) _ _)^), (concatR (ap_compose wB _ _)^). 
-  apply ap, (concat concat_pp_p), moveR_Vp.
+  apply ap, (concat (concat_pp_p _ _ _)), moveR_Vp.
   path_via (ap (f' o wA) (eissect wA a) @ wf a).
     apply whiskerR.  apply (concatR (ap_compose wA f' _)^).
     apply ap, eisadj.
@@ -89,7 +91,7 @@ Proof.
     path_via ((eisretr wB (f' (wA (wA ^-1 a))))^ @
        ap (wB o wB ^-1) (wf ((wA ^-1) a))).
       rewrite ap_V. rewrite <- eisadj.
-      path_via' (ap idmap (wf ((wA ^-1) a))
+      transitivity (ap idmap (wf ((wA ^-1) a))
         @ (eisretr wB (wB (f ((wA ^-1) a))))^).
       apply whiskerR. apply inverse. apply ap_idmap.
       apply (concat_Ap
@@ -106,8 +108,3 @@ Defined.
 
 End Comm_Squares.
 
-(*
-Local Variables:
-coq-prog-name: "hoqtop"
-End:
-*)

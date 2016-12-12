@@ -81,7 +81,7 @@ Module Export KP.
     - exact H1.
     - intros x y p. etransitivity.
       rapply @transport_paths_FlFr.
-      simple refine (concat_pp_p @ _).
+      simple refine (concat_pp_p _ _ _ @ _).
       apply moveR_Vp. by symmetry.
     - admit.
   Defined.
@@ -140,7 +140,7 @@ Proof.
     match goal with
     |[|- _ = ((?P1 @ _) @ ?P2) @ ?P3] =>
      rewrite (concat_p1 P1);
-       rewrite (concat_pp_p (r:= P3))
+       rewrite (concat_pp_p _ _ P3)
     end.
     match goal with
     |[|- _ = _ @ (whiskerR ?hh 1 @ _) ]
@@ -153,7 +153,7 @@ Proof.
     apply moveR_Mp.
     match goal with
     |[|- _ = ?P1 @ ((whiskerL 1 ?hh) @ ?P3)] =>
-     rewrite (concat_p_pp (p := P1));
+     rewrite (concat_p_pp P1 _ _);
        pose (rew := whiskerL_1p hh);
        apply moveL_pV in rew;
        rewrite rew; clear rew
@@ -311,14 +311,14 @@ Section KP_Sigma.
     apply moveR_pV.
     match goal with
     |[|- _ = (?P1 @ whiskerR ?hh 1) @ _] =>
-     rewrite (concat_pp_p (p:=P1));
+     rewrite (concat_pp_p P1 _ _);
        pose (rew := whiskerR_p1 hh); rewrite concat_pp_p in rew;
        apply moveL_Vp in rew
     end.
     rewrite rew; clear rew; cbn. rewrite inv_V.
     match goal with
     |[|- _ = whiskerR ?hh _ @ (?P1 @ _)]
-     => rewrite (concat_p_pp (q:=P1));
+     => rewrite (concat_p_pp _ P1 _);
        pose (rew := whiskerR_p1 hh); rewrite concat_pp_p in rew;
        apply moveL_Vp in rew
     end.
@@ -393,16 +393,16 @@ Section KP_Sigma.
     unfold X; clear X.
     match goal with
     |[|- (whiskerL _ ?hh @ (((?P @ _) @ _) @ _)) @ _ = _] =>
-     repeat rewrite (concat_pp_p (p:=P));
-       rewrite (concat_p_pp (q := P));
+     repeat rewrite (concat_pp_p P _ _);
+       rewrite (concat_p_pp _ P _);
        pose (rew := whiskerL_1p hh); rewrite concat_pp_p in rew;
        apply moveL_Vp in rew
     end.
     rewrite rew; clear rew. cbn.
     match goal with
     |[|- ( _ @ (_ @ ?P)) @ (whiskerR ?hh _) = _] =>
-     repeat rewrite (concat_p_pp (r := P));
-       rewrite (concat_pp_p (q:=P));
+     repeat rewrite (concat_p_pp _ _ P);
+       rewrite (concat_pp_p _ P _);
        pose (rew := whiskerR_p1 hh); 
        apply moveL_pV in rew
     end.
@@ -565,8 +565,8 @@ Defined.
     |[|- (?P1 @ ?P2) @ ?P3 = (?P4^ @ _) @ _] =>
      rewrite (concat_p1 P4^);
        apply moveL_Vp;
-       rewrite (concat_pp_p (p := P1));
-       rewrite (concat_p_pp (p := P4))
+       rewrite (concat_pp_p P1 _ _);
+       rewrite (concat_p_pp P4 _ _)
     end.
     match goal with
     |[|- (whiskerL 1 ?hh @ _) @ _ = _] =>
@@ -578,7 +578,7 @@ Defined.
     rewrite concat_ap_Fpq.
     match goal with
     |[|- ?P1 @ (?P2 @ ?P3^) = _ ]
-     => rewrite (concat_p_pp (r := P3^));
+     => rewrite (concat_p_pp _ _ P3^);
        apply moveR_pV
     end.
     match goal with
@@ -597,7 +597,7 @@ Defined.
     |[|- ?P1 @ (?P2 @ ?P3^) = 1 @ (1 @ (?P5 @ ?P6))]
      => rewrite (concat_1p (1 @ (P5 @ P6)));
        rewrite (concat_1p (P5 @ P6));
-       rewrite (concat_p_pp (r:=P3^)) 
+       rewrite (concat_p_pp _ _ P3^) 
     end.
     apply whiskerR.
     unfold KP_equiv_fun.
@@ -606,7 +606,7 @@ Defined.
     rewrite (ap02_pp). rewrite inv_pp.
     match goal with
     |[|- (_ @ ?P1) @ (?P2 @ ?P3) = _] =>
-     rewrite (concat_p_pp (r:=P3));
+     rewrite (concat_p_pp _ _ P3);
        rewrite (concat_1p P1)
     end.
     apply whiskerR.

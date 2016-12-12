@@ -91,7 +91,7 @@ Section TruncatedColimit.
     intro X.
     simple refine (isequiv_adjointify _ _ _).
     - intro C. simple refine (Trunc_rec _).
-      apply (equiv_inv _ (IsEquiv := is_colimit_H ColimQ X) (tr_cocone_to_cocone C)).
+      apply (equiv_inv (is_colimit_H ColimQ X) (tr_cocone_to_cocone C)).
     - intro C.
       rewrite <- compose_cocone_m_cocone; cbn.
       rewrite eisretr.

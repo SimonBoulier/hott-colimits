@@ -1,5 +1,10 @@
 Require Export Utf8_core.
-Require Import HoTT.Basics.Overture.
+Require Import HoTT.Basics.
+
+Arguments BuildEquiv [A B f] _ : rename.
+Arguments path_forall {_} [_ _ _ _] _.
+Arguments equiv_inv [A B f] _ x.
+Arguments isequiv_adjointify [A B f] _ _ _.
 
 Axiom admit : forall {a}, a.
 Tactic Notation "admit" := exact admit.

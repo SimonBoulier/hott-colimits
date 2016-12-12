@@ -192,7 +192,7 @@ Module Cocone2.
           destruct H1'^. reflexivity.
       - intros [q1 q2 H1 H2 K coh1 coh2].
         unshelve rapply path_cocone; intro x; cbn; try reflexivity.
-        simple refine (concat_pp_p @ _).
+        simple refine (concat_pp_p _ _ _ @ _).
         simple refine ((1 @@ concat_Vp _) @ _).
         exact (concat_p1 _ @ (concat_1p _)^).
         set (coh1' := coh1 x); clearbody coh1'; clear coh1.
@@ -286,7 +286,7 @@ Module Cocone2.
           pose (moveL_pV _ _ _ p1).
           pose (moveL_Vp _ _ _ p2).
           simple refine (p3 @ _). clear. cbn. hott_simpl.
-          simple refine (concat_p1 _ @ _ @ concat_p_pp).
+          simple refine (concat_p1 _ @ _ @ concat_p_pp _ _ _).
           assert (p0 @ cohq x = ap (ap y) (kp_eq2 x)). {
             simple refine (_^ @ ap02_is_ap y (kp_eq2 x)).
             simple refine (KP_rec_beta_kp_eq2 _ _ _ _ _). }

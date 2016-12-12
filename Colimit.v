@@ -67,7 +67,7 @@ Section IsColimit.
   Global Arguments is_colimit_H {D Q} H X : rename.
   
   Definition postcompose_cocone_inv {D: diagram G} `(H: is_colimit D Q) `(C: cocone D X) : Q -> X
-    := equiv_inv _ (IsEquiv := (is_colimit_H H X)) C.
+    := equiv_inv (is_colimit_H H X) C.
 End IsColimit.
 
 

@@ -1,4 +1,3 @@
-Require Export Auxiliary.
 Require Export Diagram.
 Require Export CommutativeSquares.
 Require Export Colimit.

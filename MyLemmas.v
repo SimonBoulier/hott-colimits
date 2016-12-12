@@ -77,7 +77,7 @@ Qed.
 
 Lemma ap_ap_path_forall `{HF:Funext} {X:Type} {Y:X -> Type} (g h:forall x:X, Y x) eq x
 : ap (λ f:forall x:X, Y x, f x)
-     (path_forall g h eq)
+     (@path_forall _ _ _ g h eq)
   = eq x.
   apply (apD10 (f := ((ap (x:=g) (y:=h) (λ f : ∀ x0 : X, Y x0, f x)) o apD10^-1)) (g:= λ eq, eq x)).
   simple refine (moveR_E_compose _ _).
@@ -86,10 +86,10 @@ Lemma ap_ap_path_forall `{HF:Funext} {X:Type} {Y:X -> Type} (g h:forall x:X, Y x
 Qed.
 
 Lemma ap_ap2_path_forall `{HF:Funext} (X:Type) (Y : X -> Type) (Z:forall x:X, Y x -> Type) (g h : forall x:X, forall y:Y x, Z x y) eq x y
-: ap (λ f:forall x:X, forall y:Y x, Z x y, f x y) (path_forall g h (λ x, path_forall (g x) (h x) (eq x)))
+: ap (λ f:forall x:X, forall y:Y x, Z x y, f x y) (@path_forall _ _ _ g h (λ x, @path_forall _ _ _ (g x) (h x) (eq x)))
   = eq x y.
-  rewrite (ap_compose (λ f : ∀ (x0 : X) (y0 : Y x0), Z x0 y0, f x) (λ f, f y) (path_forall g h (λ x0 : X, path_forall (g x0) (h x0) (eq x0)))).
-  pose (rew := ap_ap_path_forall (λ x0 : X, path_forall (g x0) (h x0) (eq x0))); simpl in rew. rewrite rew; clear rew.
+  rewrite (ap_compose (λ f : ∀ (x0 : X) (y0 : Y x0), Z x0 y0, f x) (λ f, f y) (@path_forall _ _ _ g h (λ x0 : X, @path_forall _ _ _ (g x0) (h x0) (eq x0)))).
+  pose (rew := ap_ap_path_forall (λ x0 : X, @path_forall _ _ _ (g x0) (h x0) (eq x0))); simpl in rew. rewrite rew; clear rew.
   apply ap_ap_path_forall.
 Qed.
 
@@ -167,11 +167,11 @@ Unset Implicit Arguments.
 
 Definition path_forall_V `{Funext} {X : Type} {P : X -> Type} {f g : forall x, P x}
   (p : forall x, f x = g x)
-: path_forall _ _ (fun x => (p x)^) = (path_forall _ _ p)^.
+: path_forall (fun x => (p x)^) = (path_forall p)^.
 Proof.
-  transitivity (path_forall _ _ (fun x => (apD10 (path_forall _ _ p) x)^)).
+  transitivity (path_forall (fun x => (apD10 (path_forall p) x)^)).
   f_ap. symmetry. apply (@ap _ _ (fun h x => (h x)^)). apply eisretr.
-  transitivity (path_forall _ _ (apD10 (path_forall _ _ p)^)).
+  transitivity (path_forall (apD10 (path_forall p)^)).
   apply ap, inverse. apply path_forall; intros x. apply apD10_V.
   apply eissect.
 Defined.

@@ -5,7 +5,6 @@ COQC = ~/Dépôts/HoTT/hoqc
 MyTacs.v
 MyLemmas.v
 
-Auxiliary.v
 CoEqualizer.v
 Colimit_Prod.v
 Colimit_Sigma.v
