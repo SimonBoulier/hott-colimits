@@ -15,11 +15,11 @@ Diagram.v
 Colimit_trunc.v
 
 MappingTelescope.v
-# IteratedKernelPair/KernelPair_v1.v
-# IteratedKernelPair/KernelPair_v2.v
-# IteratedKernelPair/IteratedKernelPair.v
-# IteratedKernelPair/KPv2_mono.v
-# IteratedKernelPair/link_KPv2_CechNerve.v
+IteratedKernelPair/KernelPair_v1.v
+IteratedKernelPair/KernelPair_v2.v
+IteratedKernelPair/IteratedKernelPair.v
+IteratedKernelPair/KPv2_mono.v
+IteratedKernelPair/link_KPv2_CechNerve.v
 
 Colimits.v
 Pushout.v

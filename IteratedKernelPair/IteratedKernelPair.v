@@ -1,5 +1,5 @@
 Require Import HoTT.Basics HoTT.Types HoTT.Fibrations.
-Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.Colimit_Sigma MappingTelescope.
+Require Import MyTacs MyLemmas Colimits.Diagram Colimits.Colimit Colimits.Colimit_Sigma Colimits.MappingTelescope.
 
 
 Require Import KernelPair_v1.
