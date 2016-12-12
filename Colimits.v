@@ -11,7 +11,7 @@ Require Export CoEqualizer.
 Require Export Pushout.
 Require Export MappingTelescope.
 
-Require Import Flattening.
+Require Export Flattening.
 
 Require Export IteratedKernelPair.IteratedKernelPair.
 Require Export IteratedKernelPair.KernelPair_v1.

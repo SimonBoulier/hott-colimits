@@ -67,7 +67,9 @@ Section PO.
     
 End PO.
 
-
+Arguments pol {A B C f g} _.
+Arguments por {A B C f g} _.
+Arguments popp {A B C f g} _.
 
 Inductive square_points := TL | TR | DL | DR.  (* BottomLeft, ... *)
 
