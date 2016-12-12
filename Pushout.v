@@ -46,6 +46,25 @@ Section PO.
       exact pp'. reflexivity.
   Defined.
 
+
+  Definition PO_ind (P : PO → Type) (l' : forall b, P (pol b))
+             (r' : forall c, P (por c))
+             (pp' : forall a, popp a # l' (f a) = r' (g a))
+    : forall w, P w.
+    simple refine (colimit_ind P _ _).
+    - intros []; cbn.
+      intros [] x.
+      exact (transport P (@pp _ span (inl tt) (inr true) tt x) (l' (f x))).
+      intros []; cbn. exact l'. exact r'.
+    - intros [] [] []; cbn.
+      destruct u, b; cbn. reflexivity.
+      unfold popp in pp'.
+      intro a. apply moveR_transport_p.
+      etransitivity; [|apply transport_pp].
+      symmetry; apply pp'.
+  Defined.
+
+                       
   Definition PO_rec (P: Type) (l': B -> P) (r': C -> P)
              (pp': l' o f == r' o g)
     : PO -> P
@@ -55,6 +74,7 @@ Section PO.
              (pp': l' o f == r' o g)
     : forall x, ap (PO_rec P l' r' pp') (popp x) = pp' x.
   Admitted.
+  
 
   (* Definition Build_is_PO (X : Type) (inl' : B -> X) (inr' : C -> X) *)
   (*            (pp' : forall a, inl' (f a) = inr' (g a)) *)
@@ -70,6 +90,9 @@ End PO.
 Arguments pol {A B C f g} _.
 Arguments por {A B C f g} _.
 Arguments popp {A B C f g} _.
+Arguments PO_ind {A B C f g} P l' r' pp' _.
+Arguments PO_rec {A B C f g} P l' r' pp' _.
+Arguments PO_rec_beta_pp {A B C f g} P l' r' pp' _.
 
 Inductive square_points := TL | TR | DL | DR.  (* BottomLeft, ... *)
 

@@ -252,7 +252,7 @@ Section POCase.
           (f0 : forall x, A0 x <~> B0 (f x)) (g0 : forall x, A0 x <~> C0 (g x)).
 
   Let P : PO f g -> Type.
-    simple refine (PO_rec _ _ Type B0 C0 _).
+    simple refine (PO_rec Type B0 C0 _).
     cbn; intro x. eapply path_universe_uncurried.
     etransitivity. symmetry. apply f0. apply g0.
   Defined.
