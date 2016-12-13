@@ -20,17 +20,12 @@ Section PO.
 
   Definition PO := colimit span.
 
-  Definition pol : B -> PO.
-    intro. simple refine (colim _ _); cbn. exact (inr true). exact X.
-  Defined.
-  Definition por : C -> PO.
-    intro. simple refine (colim _ _); cbn. exact (inr false). exact X.
-  Defined.
+  Definition pol : B -> PO := colim (D:=span) (inr true).
+  Definition por : C -> PO := colim (D:=span) (inr false).
 
-  Definition popp (a : A) : pol (f a) = por (g a).
-    exact (pp (D:=span) (inl tt) (inr true) tt a
-               @ (pp (D:=span) (inl tt) (inr false) tt a)^).
-  Defined.
+  Definition popp (a : A) : pol (f a) = por (g a)
+    := pp (D:=span) (inl tt) (inr true) tt a
+          @ (pp (D:=span) (inl tt) (inr false) tt a)^.
   
   Definition is_PO := is_colimit span.
 
@@ -46,7 +41,16 @@ Section PO.
       exact pp'. reflexivity.
   Defined.
 
-
+  Definition pol' {Z} (Co : cocone span Z) : B -> Z
+    := q Co (inr true).
+  Definition por' {Z} (Co : cocone span Z) : C -> Z
+    := q Co (inr false).
+  Definition popp' {Z} (Co : cocone span Z) : pol' Co o f == por' Co o g
+    := fun x => qq Co (inl tt) (inr true) tt x
+                @ (qq Co (inl tt) (inr false) tt x)^.
+  
+  
+  
   Definition PO_ind (P : PO → Type) (l' : forall b, P (pol b))
              (r' : forall c, P (por c))
              (pp' : forall a, popp a # l' (f a) = r' (g a))
@@ -84,6 +88,21 @@ Section PO.
   (*     destruct 0; cbn. exact (fun a => inl' (f a)). *)
   (*     destruct b; eassumption. *)
   (*     cbn. *)
+
+  Definition PO_of_equiv (Hf : IsEquiv f)
+    : IsEquiv por.
+    use isequiv_adjointify.
+    use PO_rec. exact (g o f^-1). exact idmap.
+    intro x. apply ap. apply eissect.
+    use PO_ind; cbn.
+    intro. refine ((popp _)^ @ _). apply ap.
+    apply eisretr. reflexivity.
+    intro a; cbn. rewrite transport_paths_FlFr, ap_idmap.
+    rewrite ap_compose. rewrite PO_rec_beta_pp.
+    rewrite eisadj. destruct (eissect f a). cbn.
+    rewrite concat_1p, concat_p1. apply concat_Vp.
+    intro; reflexivity.
+  Defined.
     
 End PO.
 

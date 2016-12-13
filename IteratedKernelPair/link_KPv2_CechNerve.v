@@ -141,7 +141,7 @@ Module Cocone2.
 
     Arguments cech2_delta_cocone Z : clear implicits.
 
-    Definition path_cocone Z (C C': cech2_delta_cocone Z)
+    Definition path_cech2_delta_cocone Z (C C': cech2_delta_cocone Z)
                (q1' : q1 C == q1 C')
                (q2' : q2 C == q2 C')
                (H1' : ∀ x, H1 C x @ q2' _ = q1' (π1 x) @ H1 C' x)
@@ -161,7 +161,7 @@ Module Cocone2.
     Arguments cech2_delta_cocone' Z : clear implicits.
 
     
-    Definition path_cocone' Z (C C': cech2_delta_cocone' Z)
+    Definition path_cech2_delta_cocone' Z (C C': cech2_delta_cocone' Z)
                (q' : q C == q C')
                (Hq' : ∀ x, Hq C x @ q' _ = q' (π1 x) @ Hq C' x)
                (cohq': ∀ x, (cohq C x @@ 1) @ (concat_1p _ @ (concat_p1 _)^)
@@ -169,7 +169,8 @@ Module Cocone2.
       : C = C'.
     Admitted.
     
-    Definition equiv_delta_cocone Z : cech2_delta_cocone Z <~> cech2_delta_cocone' Z.
+    Definition equiv_delta_cocone Z
+      : cech2_delta_cocone Z <~> cech2_delta_cocone' Z.
     Proof.
       simple refine (equiv_adjointify _ _ _ _).
       - intros [q1 q2 H1 H2 K coh1 coh2].
@@ -183,7 +184,7 @@ Module Cocone2.
         exact (λ _, 1). 
         exact H1. intro; reflexivity.
       - intros [q H H1].
-        unshelve rapply path_cocone'; intro x; cbn.
+        unshelve rapply path_cech2_delta_cocone'; intro x; cbn.
         + reflexivity.
         + exact (concat_p1 _ @ concat_p1 _ @ (concat_1p _)^).
         + cbn. set (H1' := H1 x) in *; clearbody H1'; clear H1.
@@ -191,7 +192,8 @@ Module Cocone2.
           rewrite <- (inv_V H1').
           destruct H1'^. reflexivity.
       - intros [q1 q2 H1 H2 K coh1 coh2].
-        unshelve rapply path_cocone; intro x; cbn; try reflexivity.
+        unshelve rapply path_cech2_delta_cocone;
+          intro x; cbn; try reflexivity.
         simple refine (concat_pp_p _ _ _ @ _).
         simple refine ((1 @@ concat_Vp _) @ _).
         exact (concat_p1 _ @ (concat_1p _)^).
@@ -207,9 +209,9 @@ Module Cocone2.
 
 
     Definition postcompose_cocone {X} (C: cech2_delta_cocone X) Y (g: X -> Y)
-      : @cech2_delta_cocone Y.
+      : cech2_delta_cocone Y.
     Proof.
-      unshelve rapply @Build_cech2_delta_cocone.
+      use Build_cech2_delta_cocone.
       exact (g o (q1 C)). exact (g o (q2 C)).
       all: intro x; cbn; apply ap.
       apply H1. apply H2. apply K. apply coh1. apply coh2.
@@ -219,9 +221,9 @@ Module Cocone2.
       ∃ (C: cech2_delta_cocone Z), ∀ Y, IsEquiv (postcompose_cocone C Y).
 
     Definition postcompose_cocone' {X} (C: cech2_delta_cocone' X) Y (g: X -> Y)
-      : @cech2_delta_cocone' Y.
+      : cech2_delta_cocone' Y.
     Proof.
-      unshelve rapply @Build_cech2_delta_cocone'.
+      use Build_cech2_delta_cocone'.
       exact (g o (q C)).
       all: intro x; cbn.
       apply ap, Hq. exact (ap (ap g) (cohq C x)).
@@ -230,43 +232,62 @@ Module Cocone2.
     Definition is_colimit' Z :=
       ∃ (C: cech2_delta_cocone' Z), ∀ Y, IsEquiv (postcompose_cocone' C Y).
 
-    Definition colimit'_colimit Z : is_colimit' Z -> is_colimit Z.
+    Definition colimit'_colimit Z : is_colimit' Z <-> is_colimit Z.
     Proof.
-      intros [C HC].
-      exists ((equiv_delta_cocone _)^-1 C).
-      intro Y.
-      simple refine (isequiv_homotopic
-                ((equiv_delta_cocone Y)^-1 o (postcompose_cocone' C Y))
-                (H:=isequiv_compose) _).
-      intro g. unshelve rapply path_cocone.
-      all: intro; try reflexivity.
-      exact (concat_p1 _ @ (concat_1p _)^).
-      simple refine (concat_p1 _ @ _).
-      change ( ap (ap g) (cohq C x) @@ 1
-               = (concat_p1 (ap g (Hq C (δ x)))
-                            @ (concat_1p (ap g (Hq C (δ x))))^)
-                   @ (1 @@ ap (ap g) (cohq C x)) ).
-      set (coh := cohq C x); clearbody coh.
-      set (Hq := Hq C (δ x)) in *; clearbody Hq.
-      rewrite <- (inv_V coh). destruct coh^.
-      reflexivity.
+      split.
+      - intros [C HC]. exists ((equiv_delta_cocone Z)^-1 C).
+        intro Y. use isequiv_homotopic.
+        exact ((equiv_delta_cocone Y)^-1 o (postcompose_cocone' C Y)).
+        unshelve use isequiv_compose. exact (HC Y).
+        exact (isequiv_inverse _).
+        intro g. use path_cech2_delta_cocone.
+        all: intro. reflexivity. reflexivity.
+        exact (concat_p1 _ @ (concat_1p _)^).
+        reflexivity. reflexivity.
+        simple refine (concat_p1 _ @ _).
+        change ( ap (ap g) (cohq C x) @@ 1
+                 = (concat_p1 (ap g (Hq C (δ x)))
+                              @ (concat_1p (ap g (Hq C (δ x))))^)
+                     @ (1 @@ ap (ap g) (cohq C x)) ).
+        set (coh := cohq C x); clearbody coh.
+        set (Hq := Hq C (δ x)) in *; clearbody Hq.
+        rewrite <- (inv_V coh). destruct coh^.
+        reflexivity. reflexivity.
+      - intros [C HC]. exists (equiv_delta_cocone _ C).
+        intro Y. use isequiv_homotopic.
+        exact (equiv_delta_cocone _ o postcompose_cocone C Y).
+        unshelve use isequiv_compose. exact (HC Y).
+        apply (equiv_delta_cocone Y).
+        intro g. use path_cech2_delta_cocone'.
+        + intro. reflexivity.
+        + intro. refine (concat_p1 _ @ _ @ (concat_1p _)^).
+          cbn. refine (_ @ (ap_pp _ _ _)^).
+          refine (1 @@ _). symmetry; apply ap_V.
+        + intro. simple refine (concat_p1 _ @ _).
+          cbn. destruct C as [q1 q2 H1 H2 K coh1 coh2]. cbn. clear.
+          subst δ.
+          set (coh1' := coh1 x).
+          set (coh2' := coh2 x).
+          set (K' := K x) in *. cbn in *.
+          clearbody coh1'. clearbody coh2'. destruct coh1', coh2'.
+          destruct (H2 (x; (x; 1))). reflexivity.
     Defined.
 
     Goal is_colimit (KP' f).
     Proof.
       apply colimit'_colimit.
-      unshelve rapply @exist.
-      - unshelve rapply @Build_cech2_delta_cocone'.
+      unshelve eexists.
+      - use Build_cech2_delta_cocone'.
         exact kp. all: intro x; cbn.
         exact (kp_eq _ _ x.2.2).
         apply kp_eq2.
-      - intro Y. unshelve rapply @isequiv_adjointify.
-        + intro C. unshelve rapply @KP_rec.
+      - intro Y. use isequiv_adjointify.
+        + intro C. use KP_rec.
           exact (q C).
           intros a b p. exact (Hq C (a; (b; p))).
           intro a; cbn. exact (cohq C _ ).
         + intros [q Hq cohq].
-          unshelve rapply @path_cocone'; cbn.
+          use path_cech2_delta_cocone'; cbn.
           all: intro x; try reflexivity; cbn.
           simple refine (concat_p1 _ @ _ @ (concat_1p _)^).
           apply KP_rec_beta_kp_eq.
@@ -293,7 +314,103 @@ Module Cocone2.
           rewrite X. f_ap.
         + intro g; cbn.
           apply path_forall; intro x.
-          admit.                  (* ok : KP_eta *)
+          use KP_eta; cbn.
+          intro; reflexivity.
+          intros x0 y p; cbn.
+          refine (concat_1p _ @ _ @ (concat_p1 _)^).
+          symmetry. use KP_rec_beta_kp_eq.
+          intro; cbn. rewrite transport_paths_FlFr.
+          admit. 
+    Defined.
+
+
+    Require Import Colimits.Colimit Colimits.Pushout.
+
+    Arguments pol' {_ _ _ _ _ _} _ _.
+    Arguments por' {_ _ _ _ _ _} _ _.
+    Arguments popp' {_ _ _ _ _ _} _ _.
+
+               
+    Definition equiv_delta_cocone_PO Z
+      : cocone (span π1 π2) Z <~> cech2_delta_cocone' Z.
+      use equiv_adjointify.
+      (* flèche dans le sens direct *)
+      - intro Co.
+        unshelve eexists. exact (pol' Co).
+        intros [x [y t]].
+        exact (popp' Co (x; (y; t)) @ (popp' Co (y; (y; 1)))^).
+        intro; apply concat_pV.
+      (* autre flèche *)
+      - intros [p h1 h2]. use Build_span_cocone. 
+        exact p. exact p. exact h1.
+      (* section sur cech2_delta_cocone' *)
+      - intros [p h1 h2]. use path_cech2_delta_cocone'; cbn.
+        + intro; reflexivity.
+        + intros [x [y t]]; cbn.
+          refine (concat_p1 _ @ _ @ (concat_1p _)^).
+          refine (_ @ concat_p1 _). refine (_ @@ _).
+          apply concat_p1. use (inverse2 (q := 1)).
+          refine (concat_p1 _ @ h2 y).
+        + intro; cbn. unfold popp'; subst δ; cbn in *.
+          set (h1' := h1 (x; (x; 1))) in *. cbn in h1'.
+          refine (concat_p1 _ @ _).
+          rewrite <- (inv_V (h2 x)).
+          set (h2' := (h2 x)^). destruct h2'. reflexivity.
+      (* section sur cocone 1 *)
+      - intro Co. use path_cocone.
+        + intros [[]|[]] x; cbn.
+          refine (_ @ qq Co (inl tt) (inr false) tt x); cbn.
+          exact (popp' Co (_; (_; 1))).
+          reflexivity.
+          exact (popp' Co (_; (_; 1))).
+        + intros [] [] [] [x [y t]]. destruct u, b; cbn.
+          rewrite concat_1p. rewrite concat_p_pp. eapply moveR_pM.
+          rewrite concat_pp_p. rewrite concat_Vp, concat_p1.
+          reflexivity.
+          rewrite concat_1p. reflexivity.
+    Defined.
+
+    Goal forall Z, is_colimit' Z <-> is_PO π1 π2 Z.
+      intro Z. split.
+      - intros [C HC]. exists ((equiv_delta_cocone_PO Z)^-1 C).
+        intro Y. use isequiv_homotopic.
+        exact ((equiv_delta_cocone_PO Y)^-1 o (postcompose_cocone' C Y)).
+        unshelve use isequiv_compose. exact (HC Y).
+        exact (isequiv_inverse _).
+        intro g. use path_cocone.
+        + intros [[]|[]] x; reflexivity.
+        + intros [] [] [] x; cbn. destruct u, b; cbn.
+          refine (concat_p1 _ @ (concat_1p _)^).
+          reflexivity.
+      - intros [C HC]. exists (equiv_delta_cocone_PO _ C).
+        intro Y. use isequiv_homotopic.
+        refine (equiv_delta_cocone_PO _ o postcompose_cocone C).
+        unshelve use isequiv_compose. exact (HC Y).
+        apply (equiv_delta_cocone_PO Y).
+        intro g. use path_cech2_delta_cocone'.
+        + intro. reflexivity.
+        + intros [x [y t]].
+          refine (concat_p1 _ @ _ @ (concat_1p _)^); cbn.
+          unfold popp'; cbn.
+          refine (_ @ (ap_pp _ _ _)^).
+          refine (_ @@ _). refine (_ @ (ap_pp _ _ _)^).
+          exact (1 @@ (ap_V _ _)^).
+          refine (_ @ (ap_V _ _)^). apply inverse2.
+          refine (_ @ (ap_pp _ _ _ )^).
+          exact (1 @@ (ap_V _ _)^).
+        + intro; cbn.
+          unfold popp'. cbn.
+          set (Q1 := qq C (inl tt) (inr true) tt (x; (x; 1))).
+          set (Q2 := qq C (inl tt) (inr false) tt (x; (x; 1))).
+          refine (concat_p1 _ @ _). cbn in *.
+          clearbody Q1. clearbody Q2. clear.
+          unfold pol', por'; cbn.
+          set (C (inr true) x) in *.
+          set (C (inr false) x) in *.
+          set (C (inl tt) (x; (x; 1))) in *.
+          clearbody z1. destruct Q1.
+          clearbody z0. destruct Q2.
+          reflexivity.
     Defined.
   End Cocone.
 End Cocone2.
